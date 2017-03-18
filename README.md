@@ -293,121 +293,15 @@ DDS規範定義了遵從性概況以提供用於指示DDS實現可能支持或�
 
 •為HISTORY QoS策略設置深度&gt; 1。
 
-目前，即使已禁用ownership\_profile，仍支持支持HISTORY深度&gt; 1的OpenDDS代碼。
+**注意:**目前，即使已禁用ownership\_profile，仍支持HISTORY 深度&gt; 1的OpenDDS代碼。
 
+#### 1.3.3.4對像模型概要
 
+功能名稱：object\_model\_profile
 
+此配置文件包括對“GROUP”的presentENTATION access\_scope設置的支持。
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+**注意:**目前，當object\_model\_profile被禁用時，“TOPIC”的PRESENTATION access\_scope也被排除。
 
 
 
