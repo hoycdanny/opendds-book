@@ -217,13 +217,199 @@ OpenDDS實現一個稱為DCPS信息庫的獨立服務
 
 關於RTPS發現如何發生的更多細節，可以在實時發布 - 訂閱有線協議DDS互操作性有線協議規範（DDSI-RTPS）v2.2（OMG文件格式/ 2014 -09-01）。
 
-## 1.2.3.4 Threading
+### 1.2.3.4 Threading
 
 OpenDDS創建自己的ORB（當需要一個ORB時）以及運行該ORB的單獨的線程。 它還使用自己的線程來處理傳入和傳出傳輸I / O。 創建單獨的線程以在意外連接關閉時清除資源。 您的應用程序可能會通過DCPS的偵聽器機制從這些線程中調用。
 
 當通過DDS發布樣本時，OpenDDS通常嘗試使用調用線程將樣本發送到任何已連接的訂閱者。 如果發送調用塊，則樣本可以排隊等待在單獨的服務線程上發送。 此行為取決於第3章中描述的QoS策略。
 
 訂戶中的所有傳入數據由服務線程讀取並排隊等待應用程序讀取。 從服務線程調用DataReader偵聽器。
+
+### 1.2.3.5配置
+
+OpenDDS包括一個基於文件的配置框架，用於配置全局項，如調試級別，內存分配和發現，以及發布商和訂閱者的傳輸實現詳細信息。配置也可以直接在代碼中實現，但是，建議將配置外部化，以便於維護和減少運行時錯誤。第7章介紹了完整的配置選項集。
+
+## 1.3安裝
+
+有關如何構建OpenDDS的步驟可以在$ DDS\_ROOT / INSTALL中找到。為了避免編譯您不會使用的OpenDDS代碼，有一些功能比可以從構建中排除。下面討論這些特徵。需要小尺寸配置或與安全性平台兼容性的用戶應考慮使用本指南第13章中所述的OpenDDS安全配置文件。
+
+### 1.3.1啟用或禁用功能的構建
+
+大多數功能都由configure腳本支持。 configure腳本創建具有正確內容的配置文件，然後運行MPC。如果使用configure腳本，請使用“--help”命令行選項運行它，並查找要啟用/禁用的功能。
+
+如果不使用configure腳本，請繼續閱讀以下有關直接運行MPC的說明。
+
+對於下述功能，MPC用於啟用（默認）功能或禁用功能。對於名為feature的功能部件，使用以下步驟從構建中禁用功能部件：
+
+1）使用MPC的命令行“features”參數：
+
+mwc.pl -type &lt;type&gt; -features feature = 0 DDS.mwc或者，將line feature = 0添加到文件$ ACE\_ROOT / bin / MakeProjectCreator / config / default.features中，並使用MPC重新生成項目文件。
+
+2）如果您使用gnuace MPC項目類型（如果您將使用GNU make作為您的構建系統，則是這種情況），請將文件$ ACE\_ROOT / include / makeinclude / platform\_macros.GNU中添加“feature = 0”。
+
+要顯式啟用該功能，請使用上面的feature = 1。
+
+**注意:**您還可以使用$ DDS\_ROOT / configure腳本啟用或禁用功能。 要禁用該功能，請將--no-feature傳遞給腳本，以啟用pass -feature。 在這種情況下，在要素名稱中使用“ - ”而不是“\_”。 例如，要禁用下面討論的功能content\_subscription，請將-no-content-subscription傳遞給configure腳本。
+
+### 1.3.2禁用內置主題的構建
+
+支持功能名稱：built\_in\_topics通過禁用內置主題支持，可以將核心DDS庫的佔用空間減少高達30％。請參見第6章以確定是否構建沒有BIT支持。
+
+### 1.3.3禁用合規性配置文件特性的建立
+
+DDS規範定義了遵從性概況以提供用於指示DDS實現可能支持或可能不支持的某些特徵集合的通用術語。以下給出這些配置文件以及用於禁用對該配置文件或該配置文件的組件的支持的MPC功能的名稱。
+
+許多配置文件選項涉及QoS設置。如果嘗試使用與禁用的配置文件不兼容的QoS值，則會發生運行時錯誤。如果配置文件涉及類，則如果嘗試使用該類並禁用配置文件，則會發生編譯時錯誤。
+
+#### 1.3.3.1內容訂閱配置文件
+
+功能名稱：content\_subscription
+
+此配置文件添加第5章中討論的類ContentFilteredTopic，QueryCondition和MultiTopic。此外，可以通過使用下表中給出的功能來排除個別類。
+
+**Table 1-2: Content-Subscription Class Features**
+
+| Class | Feature |
+| :--- | :--- |
+| ContentFilteredTopic | content\_filtered\_topic |
+| QueryCondition | query\_condition |
+| MultiTopic | multi\_topic |
+
+#### 1.3.3.2持續性簡介
+
+功能名稱：persistence\_profile
+
+此配置文件添加QoS策略DURABILITY\_SERVICE和DURABILITY QoS策略類型的設置“TRANSIENT”和“PERSISTENT”。
+
+#### 1.3.3.3所有權簡介
+
+功能名稱：ownership\_profile
+
+此配置文件添加：
+
+•所有權類型的設置“EXCLUSIVE”
+
+•支持OWNERSHIP\_STRENGTH策略
+
+•為HISTORY QoS策略設置深度&gt; 1。
+
+目前，即使已禁用ownership\_profile，仍支持支持HISTORY深度&gt; 1的OpenDDS代碼。
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
