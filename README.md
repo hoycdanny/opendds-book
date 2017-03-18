@@ -79,5 +79,109 @@ OpenDDS當前實現的QoS策略將在第3章中詳細討論。
 
 DCPS層為每個實體定義回調接口，其允許應用進程“監聽”關於該實體的某些狀態改變或事件。 例如，當有可用於讀取的數據值時，通知數據讀取器偵聽器。
 
+### 1.1.5條件
+
+條件和等待集允許在偵聽DDS中感興趣的事件時使用偵聽器的替代方案。 一般模式是應用程序創建一個特定類型的Condition對象，例如StatusCondition，並將其附加到WaitSet。
+
+•應用程序等待WaitSet，直到一個或多個條件成為真。
+
+•應用程序調用對相應實體對象的操作以提取必要的信息。
+
+•DataReader接口還具有讀取ReadCondition參數的操作。
+
+•QueryCondition對像作為Content-Subscription配置文件實現的一部分提供。QueryCondition接口擴展了ReadCondition接口。
+
+## 1.2 OpenDDS實現
+
+### 1.2.1合規性
+
+OpenDDS符合OMG DDS和OMG DDSI-RTPS規範。 遵守的細節在這裡。
+
+### 1.2.1.1 DDS合規性
+
+DDS規範的第2節定義了DDS實現的五個合規點：
+
+1）最低配置文件
+
+2）內容訂閱簡檔
+
+3）持久性概況
+
+4）所有權簡介
+
+5）對像模型配置文件
+
+OpenDDS符合整個DDS規範（包括所有可選配置文件）。 這包括實施所有服務質量政策，並註意以下事項：
+
+•僅當使用TCP或IP多播傳輸（配置為可靠）或使用RTPS\_UDP傳輸時，才支持RELIABILITY.kind = RELIABLE。
+
+•TRANSPORT\_PRIORITY未實現為可更改。
+
+### 1.2.1.2 DDSI-RTPS合規性
+
+OpenDDS實現符合OMG DDSI-RTPS規範的要求。
+
+OpenDDS RTPS實現註釋OMG DDSI-RTPS規範（正式/ 2014-09-01）提供的語句
+
+實現，但不是合規性要求。在使用OpenDDS RTPS功能進行傳輸和/或發現時，應考慮以下各項。每個項目提供了DDSI-RTPS規範的部分編號，以供進一步參考。
+
+#### 未在OpenDDS中實現的項目：
+
+1）寫入器端內容過濾（8.7.3）OpenDDS可能仍然丟棄任何相關讀者不需要的樣本（由於內容過濾） - 這是在傳輸層之上完成的
+
+2）用於演示QoS的相干集（8.7.5）
+
+3）定向寫入（8.7.6）
+
+4）屬性列表（8.7.7）
+
+5）DURABLE數據的原始寫入者信息（8.7.8） - 這將僅用於臨時和持久持久性，這是RTPS規範不支持的（8.7.2.2.1）
+
+6）不生成密鑰散列（8.7.9），但它們是可選的
+
+7）nackSuppressionDuration（表8.47）和heartbeatSuppressionDuration
+
+（表8.62）。
+
+注意:上面的項目3和4在DDSI-RTPS規範中描述。 然而，它們在DDS規範中沒有相應的概念。
+
+## 1.2.2擴展到DDS規範
+
+DDS IDL模塊（C ++命名空間，Java包）中的數據類型，接口和常量直接對應於DDS規範，極少有例外：
+
+•DDS :: SampleInfo包含一個以“opendds\_reserved”開頭的附加字段，
+
+•特定於類型的DataReaders（包括內置主題的DataReaders）具有其他操作read\_instance\_w\_condition（）和take\_instance\_w\_condition（）。
+
+
+
+額外的擴展行為由OpenDDS模塊/命名空間/包中的各種類和接口提供。 這些功能包括Recorder和Replayer（見第12章）以及以下功能：
+
+•OpenDDS :: DCPS :: TypeSupport添加在DDS規範中未找到的unregister\_type（）操作。
+
+•OpenDDS :: DCPS :: ALL\_STATUS\_MASK，NO\_STATUS\_MASK和DEFAULT\_STATUS\_MASK是DDS :: Entity，DDS :: StatusCondition和各種create \_ \*（）操作使用的DDS :: StatusMask類型的有用常量。
+
+## 1.2.3 OpenDDS架構
+
+本節簡要概述了OpenDDS實現，其特性及其一些組件。 $ DDS\_ROOT環境變量應指向OpenDDS發行版的基本目錄。 OpenDDS的源代碼可以在$ DDS\_ROOT / dds /目錄下找到。 DDS測試可以在$ DDS\_ROOT / tests /下找到。
+
+## 1.2.3.1設計哲學
+
+OpenDDS實現和API基於對OMG IDL PSM的相當嚴格的解釋。在幾乎所有情況下，OMG的CORBA IDL的C ++語言映射用於定義DDS規範中的IDL如何映射到OpenDDS向客戶端公開的C ++ API。
+
+與OMG IDL PSM的主要偏離在於本地接口用於實體和各種其他接口。這些在DDS規範中定義為非約束（非本地）接口。將它們定義為本地接口可以提高性能，減少內存使用，簡化客戶端與這些接口的交互，並使客戶端更容易構建自己的實現。
+
+## 1.2.3.2可擴展傳輸框架（ETF）
+
+OpenDDS使用DDS規範定義的IDL接口來初始化和控制服務使用。數據傳輸通過OpenDDS特定的傳輸框架來實現，該傳輸框架允許服務與各種傳輸協議一起使用。這被稱為可插拔傳輸，使OpenDDS的可擴展性成為其架構的重要組成部分。 OpenDDS目前支持TCP / IP，UDP / IP，IP多播，共享存儲和RTPS\_UDP傳輸協議，如圖1-2所示。傳輸通常通過配置文件指定，並附加到發布者和訂閱者進程中的各種實體。有關配置ETF組件的詳細信息，請參見第7.4.4節。
+
+![](/1.2.jpg)
+
+ETF使應用程序開發人員能夠實現自己的定制傳輸。
+
+實現自定義傳輸涉及專門化在傳輸框架中定義的多個類。 udp傳輸提供了開發人員在創建自己的實現時可以使用的良好基礎。 有關詳細信息，請參閱$ DDS\_ROOT / dds / DCPS / transport / udp /目錄。
+
+
+
 
 
