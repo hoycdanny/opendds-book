@@ -366,7 +366,7 @@ DDS::DataReaderListener_var listener(new DataReaderListenerImpl);
 
 ## 2.1.5數據讀取器偵聽器實現
 
-我們的監聽器類實現由DDS規範定義的`DDS :: DataReaderListener`接口。 DataReaderListener包裝在一個`DCPS :: LocalObject`中，它解決了諸如`_narrow`和`_ptr_type`之類的模糊繼承成員。 接口定義了我們必須實現的多個操作，每個操作被調用以通知我們不同的事件。` OpenDDS :: DCPS :: DataReaderListener`定義了OpenDDS的特殊需求的操作，例如斷開連接和重新連接的事件更新。 這裡是接口定義：
+我們的監聽器類實現由DDS規範定義的`DDS :: DataReaderListener`接口。 DataReaderListener包裝在一個`DCPS :: LocalObject`中，它解決了諸如`_narrow`和`_ptr_type`之類的模糊繼承成員。 接口定義了我們必須實現的多個操作，每個操作被調用以通知我們不同的事件。`OpenDDS :: DCPS :: DataReaderListener`定義了OpenDDS的特殊需求的操作，例如斷開連接和重新連接的事件更新。 這裡是接口定義：
 
 ```cpp
 module DDS {
@@ -395,6 +395,127 @@ void DataReaderListenerImpl::on_data_available(DDS::DataReader_ptr reader)
   std::cerr << "read: _narrow failed." << std::endl;
   return;
  }
+```
+
+上面的代碼將傳遞到偵聽器的通用數據讀取器縮小到特定於類型的MessageDataReader接口。 以下代碼從消息讀取器獲取下一個樣本。 如果獲取成功並返回有效數據，我們打印出每個消息的字段。
+
+```cpp
+Messenger::Message message;
+ DDS::SampleInfo si ;
+ DDS::ReturnCode_t status = reader_i->take_next_sample(message, si) ;
+ if (status == DDS::RETCODE_OK) {
+  if (si.valid_data == 1) {
+   std::cout << "Message: subject = " << message.subject.in() << std::endl
+    << " subject_id = " << message.subject_id << std::endl
+    << " from = " << message.from.in() << std::endl
+    << " count = " << message.count << std::endl
+    << " text = " << message.text.in() << std::endl;
+  }
+  else if (si.instance_state == DDS::NOT_ALIVE_DISPOSED_INSTANCE_STATE)
+ {
+   std::cout << "instance is disposed" << std::endl;
+ }
+  else if (si.instance_state == DDS::NOT_ALIVE_NO_WRITERS_INSTANCE_STATE)
+ {
+   std::cout << "instance is unregistered" << std::endl;
+ }
+  else
+ {
+   std::cerr << "ERROR: received unknown instance state "
+    << si.instance_state << std::endl;
+ }
+ } else if (status == DDS::RETCODE_NO_DATA) {
+    cerr << "ERROR: reader received DDS::RETCODE_NO_DATA!" << std::endl;
+ } else {
+    cerr << "ERROR: read Message: Error: " << status << std::endl;
+ }
+```
+
+請注意，樣本讀取可能包含無效數據。 valid\_data標誌指示樣本是否具有有效數據。有兩個示例，其中無效數據傳遞到偵聽器回調以用於通知。一個是dispose通知，當DataWriter顯式調用`dispose（）`時接收。另一個是未註冊的通知，它在DataWriter顯式調用`unregister（）`時接收。處理通知的實例狀態設置為`NOT_ALIVE_DISPOSED_INSTANCE_STATE`，而註銷通知的實例狀態設置為`NOT_ALIVE_NO_WRITERS_INSTANCE_STATE`。如果有其他樣本可用，服務將再次調用此函數。然而，一次讀取單個樣本的值不是處理傳入數據的最有效的方式。數據讀取器接口提供了許多不同的選項，以更有效的方式處理數據。我們在第2.2節討論這些操作中的一些。
+
+## 2.1.6在OpenDDS客戶端中清除
+
+在發布者和訂閱者完成後，我們可以使用以下代碼清理OpenDDS相關對象：
+
+```cpp
+participant->delete_contained_entities();
+dpf->delete_participant(participant);
+TheServiceParticipant->shutdown ();
+```
+
+域參與者的`delete_contained_entities（）`操作將刪除使用該參與者創建的所有主題，訂閱者和發布者。一旦完成，我們可以使用域參與者工廠刪除我們的域參與者。
+
+由於DDS中的數據的發布和訂閱是分離的，如果在已經由訂閱接收到的所有數據之前發布被取消關聯`(shutdown)`，則不能保證傳送數據。如果應用程序要求接收所有發布的數據，則`wait_for_acknowledgements（）`操作可用於允許發布等待直到接收到所有寫入的數據。數據讀取器必須具有RELIABILITY QoS（這是默認值）的RELIABLE設置才能使`wait_for_acknowledgements（）`正常工作。此操作在單個DataWriter上調用，並包括超時值以綁定等待時間。以下代碼說明使用`wait_for_acknowledgements（）`阻止最多15秒鐘等待訂閱確認收到所有寫入數據：
+
+```cpp
+DDS::Duration_t shutdown_delay = {15, 0};
+ DDS::ReturnCode_t result;
+ result = writer->wait_for_acknowledgments(shutdown_delay);
+ if( result != DDS::RETCODE_OK) {
+ std::cerr << "Failed while waiting for acknowledgment of "
+           << "data being received by subscriptions, some data "
+           << "may not have been delivered." << std::endl;
+ }
+```
+
+## 2.1.7運行示例
+
+我們現在準備好運行我們的簡單例子。在自己的窗口中運行這些命令應該使您最容易理解輸出。
+
+首先，我們將啟動一個DCPSInfoRepo服務，以便我們的發布商和訂閱者可以找到另一個。
+
+**注意:**如果通過將環境配置為使用RTPS發現來使用對等發現，則不需要執行此步驟。
+
+DCPSInfoRepo可執行文件位於$ DDS\_ROOT / bin / DCPSInfoRepo中。當我們啟動DCPSInfoRepo時，我們需要確保發布者和訂閱者應用程序進程也可以找到啟動的DCPSInfoRepo。此信息可以通過以下三種方式之一提供：
+
+a。）命令行上的參數。
+
+b。）生成並放置在共享文件中供應用程序使用。
+
+c。）放置在配置文件中的參數，供其他進程使用。
+
+對於我們的簡單示例，我們將使用選項'b'通過將DCPSInfoRepo的位置屬性生成為一個文件，以便我們的簡單發布者和訂閱者可以讀取它並連接到它。
+
+從您當前的目錄類型：
+
+Windows:
+
+```cpp
+%DDS_ROOT%\bin\DCPSInfoRepo -o simple.ior
+```
+
+ Unix:
+
+```cpp
+$DDS_ROOT/bin/DCPSInfoRepo -o simple.ior
+```
+
+-o參數指示DCPSInfoRepo生成其到文件simple.ior的連接信息，供發布者和訂閱者使用。 在單獨的窗口中導航到包含simple.ior文件的相同目錄，並在我們的示例中通過鍵入以下命令啟動訂閱者應用程序：
+
+Windows:
+
+```cpp
+subscriber -DCPSInfoRepo file://simple.ior
+```
+
+Unix:
+
+```cpp
+./subscriber -DCPSInfoRepo file://simple.ior
+```
+
+命令行參數指示應用程序使用指定的文件來定位DCPSInfoRepo。 我們的訂閱者現在正在等待發送郵件，因此我們現在將在具有相同參數的單獨窗口中啟動發布商：
+
+Windows:
+
+```cpp
+publisher -DCPSInfoRepo file://simple.ior
+```
+
+Unix:
+
+```cpp
+./publisher -DCPSInfoRepo file://simple.ior
 ```
 
 
