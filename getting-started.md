@@ -318,7 +318,8 @@ Messenger::MessageTypeSupport_var mts =
  }
  CORBA::String_var type_name = mts->get_type_name ();
  DDS::Topic_var topic =
-  participant->create_topic("Movie Discussion List",type_name,TOPIC_QOS_DEFAULT, 0, // No listener required OpenDDS::DCPS::DEFAULT_STATUS_MASK);
+  participant->create_topic("Movie Discussion List",
+type_name,TOPIC_QOS_DEFAULT, 0, // No listener required OpenDDS::DCPS::DEFAULT_STATUS_MASK);
  if (!topic) {
   std::cerr << "Failed to create_topic." << std::endl;
   return 1;
@@ -351,7 +352,7 @@ DDS::DataReaderListener_var listener(new DataReaderListenerImpl);
 
 現在我們可以創建數據讀取器，並將其與我們的主題，默認的QoS屬性和我們剛剛創建的監聽器對象相關聯。
 
-```
+```cpp
  // Create the Datareader
  DDS::DataReader_var dr =
   sub->create_datareader(topic,DATAREADER_QOS_DEFAULT,listener, OpenDDS::DCPS::DEFAULT_STATUS_MASK);
@@ -361,167 +362,40 @@ DDS::DataReaderListener_var listener(new DataReaderListenerImpl);
  }
 ```
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+這個線程現在可以自由地執行其他應用程序工作。 當樣本可用時，我們的偵聽器對象將在OpenDDS線程上調用。
+
+## 2.1.5數據讀取器偵聽器實現
+
+我們的監聽器類實現由DDS規範定義的`DDS :: DataReaderListener`接口。 DataReaderListener包裝在一個`DCPS :: LocalObject`中，它解決了諸如`_narrow`和`_ptr_type`之類的模糊繼承成員。 接口定義了我們必須實現的多個操作，每個操作被調用以通知我們不同的事件。` OpenDDS :: DCPS :: DataReaderListener`定義了OpenDDS的特殊需求的操作，例如斷開連接和重新連接的事件更新。 這裡是接口定義：
+
+```cpp
+module DDS {
+ local interface DataReaderListener : Listener {
+  void on_requested_deadline_missed(in DataReader reader,in RequestedDeadlineMissedStatus status);
+  void on_requested_incompatible_qos(in DataReader reader,in RequestedIncompatibleQosStatus status);
+  void on_sample_rejected(in DataReader reader,in SampleRejectedStatus status);
+  void on_liveliness_changed(in DataReader reader,in LivelinessChangedStatus status);
+  void on_data_available(in DataReader reader);
+  void on_subscription_matched(in DataReader reader,in SubscriptionMatchedStatus status);
+  void on_sample_lost(in DataReader reader, in SampleLostStatus status);
+ };
+};
+```
+
+我們的示例偵聽器類使用簡單的打印語句來存儲大多數這些偵聽器操作。 這個例子真正需要的唯一操作是`on_data_available（）`，它是我們需要探索的這個類的唯一成員函數。
+
+```cpp
+void DataReaderListenerImpl::on_data_available(DDS::DataReader_ptr reader)
+{
+ ++num_reads_;
+ try {
+  Messenger::MessageDataReader_var reader_i =
+  Messenger::MessageDataReader::_narrow(reader);
+ if (!reader_i) {
+  std::cerr << "read: _narrow failed." << std::endl;
+  return;
+ }
+```
 
 
 
