@@ -256,6 +256,67 @@ Messenger::MessageDataWriter_var message_writer =
  ws->detach_condition(condition);
 ```
 
+有關狀態，條件和等待集的更多詳細信息，請參閱第4章。
+
+### 2.1.3.5樣品公佈
+
+消息發布相當簡單：
+
+```cpp
+// Write samples
+ Messenger::Message message;
+ message.subject_id = 99;
+ message.from = "Comic Book Guy";
+ message.subject = "Review";
+ message.text = "Worst. Movie. Ever.";
+ message.count = 0;
+ for (int i = 0; i < 10; ++i) {
+  DDS::ReturnCode_t error = message_writer->write(message,DDS::HANDLE_NIL);
+  ++message.count;
+  ++message.subject_id;
+ if (error != DDS::RETCODE_OK) {
+ // Log or otherwise handle the error condition
+ return 1;
+ }
+}
+```
+
+對於每個循環迭代，調用`write（）`會將消息分發給為我們的主題註冊的所有連接的訂閱者。 由於subject\_id是Message的關鍵字，因此每當subject\_id增加並且`write（）`被調用時，將創建一個新的實例（參見1.1.1.3）。` write（）`的第二個參數指定了我們發布樣例的實例。 它應該傳遞由`register_instance（）`或`DDS :: HANDLE_NIL`返回的句柄。 傳遞`DDS :: HANDLE_NIL`值表示數據寫入程序應通過檢查樣本的鍵來確定實例。 有關在發布期間使用實例句柄的詳細信息，請參見第2.2.1節。
+
+## 2.1.4設置訂閱服務器
+
+訂閱者的許多代碼與我們剛剛完成瀏覽的發布商相同或類似。 我們將快速完成類似的部分，並參考上面的討論細節。 此樣本訂閱程序的完整源代碼位於$ DDS\_ROOT / DevGuideExamples / DCPS / Messenger /中的Subscriber.cpp和DataReaderListener.cpp文件中。
+
+### 2.1.4.1初始化參與者
+
+訂閱者的開頭與發布商相同，因為我們初始化服務並加入我們的域：
+
+```
+int main (int argc, char *argv[])
+{
+ try {
+  DDS::DomainParticipantFactory_var dpf =
+   TheParticipantFactoryWithArgs(argc, argv);
+  DDS::DomainParticipant_var participant =
+  dpf->create_participant(42, // Domain ID PARTICIPANT_QOS_DEFAULT, 0, // No listener required OpenDDS::DCPS::DEFAULT_STATUS_MASK);
+ if (!participant) {
+  std::cerr << "create_participant failed." << std::endl;
+  return 1 ;
+ }
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
