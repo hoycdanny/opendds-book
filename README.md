@@ -33,9 +33,9 @@ Domain 是 DCPS 中的基本分區單元。每個實體屬於一個domain，並�
 
 domain participant是應用程序與特定的 domain 互相作用的入口點。domain participant 是個工廠給許多物件參與讀取寫入的地方。
 
-### 1.1.1.3主題
+### 1.1.1.3 Topic
 
-主題是發布和訂閱應用程序之間交互的基本手段。 每個主題在domain中都有一個唯一的名稱，以及它發布的特定數據類型。 每個主題數據類型可以指定組成其key的零個或多個字段。 發布數據時，發布過程始終指定主題。 訂閱者通過主題請求數據。 在DCPS術語中，您為主題上的不同實例中發布個別的數據樣本。 每個實例都與key的唯一值相關聯。 發布過程通過對每個樣本使用相同的key value，在同一實例上發布多個數據樣本。
+在應用程序中 Topic 是publishing 和 subscribing 溝通的基本手段。每個 topiic 在 domain 中不能重複，以及發布它的特定數據類型。每個主題數據類型可以指定組零個或多個字段以及他的key(make up its key)。在發送資料時,發送程序總是會指定一個 topic 。Subscribers 通過 topic 請求數據。在DCPS術語中，你在 topic 推送個人不同的範例資料。每個實例都與唯一的 key 有關聯。推送過程中多個相同實例範本資料使用相同的key。
 
 ### 1.1.1.4 DataWriter
 
