@@ -41,7 +41,7 @@ domain participant是應用程序與特定的 domain 互相作用的入口點。
 
 推送應用程序碼使用 DataWriter 將值傳遞到DDS。每個 DataWriter 都綁定到一個特定的 Topic。應用程式使用特別的 DataWriter 介面來發送樣本到 topic。DataWriter 負責封裝資料並傳送。
 
-### =====1.1.1.5 Publisher
+### 1.1.1.5 Publisher
 
 Publisher 接收發送資料並傳播給所有有關的 subscribers 在同一個 domain。精確的資訊實作是由服務來決定。
 
@@ -54,32 +54,32 @@ Subscribe 接收從 Publisher 的資料並給相關的 DataReader。
 DataReader 從 Subscribe 接收資料並轉換成對應 topic 的資料型態。每個 DataReader 綁定一個特定的 Topic。應用程式使用 DataReader 的特別的介面來接收樣本。
 ## 1.1.2 Built-In Topics
 
-DDS規範定義了內置於DDS實現中的許多主題。 訂閱這些內置主題使應用開發人員能夠訪問所使用的域的狀態，包括哪些主題被註冊，哪些數據讀取器和數據寫入器被連接和斷開，以及各種實體的QoS設置。 在訂閱時，應用程序接收指示域內實體的改變的樣本。
+DDS中定義了數個 Topic。訂閱內建的 Topic 可以讓開發者存取 domain 的狀態包含，註冊的 Topic ,那些 DataReader DataWriter 是連接的還有不同接口的 QOS 設定。在訂閱時,應用程式會接收在 domain 改變的實體範例。
 
 下表顯示了在DDS規範中定義的內置主題：
 
 | 主題名稱 | 描述 |
 | :--- | :--- |
-| DCPSParticipant | 每個實例表示一個域參與者。 |
-| DCPSTopic Each | 每個實例表示正常（非內置）主題。 |
-| DCPSPublication | 每個實例表示數據寫入程序。 |
-| DCPSSubscription | 每個實例表示一個數據讀取器。 |
+| DCPSParticipant | 每個實例的 domain participant |
+| DCPSTopic Each | 每個實例表的一般（非內置）主題。 |
+| DCPSPublication | 每個實例的 DataWriter|
+| DCPSSubscription | 每個實例的 DataReader  |
 
-## 1.1.3 服務質量政策
+## 1.1.3 服務質量方針(QOS)
 
-DDS規範定義了許多服務質量（QoS）策略，應用程序使用這些策略來指定其對服務的QoS要求。 參與者指定他們從服務中需要什麼行為，服務決定如何實現這些行為。 這些策略可以應用於各種DCPS實體（主題，數據寫入器，數據讀取器，發布者，訂閱者，域參與者），儘管不是所有策略都對所有類型的實體有效。
+DDS規範定義了許多服務質量（QoS）方針，應用程式使用指定的 QOS 需要的服務。 參與者指定他們從服務中需要什麼行為，服務決定如何實現這些行為。 這些這些
+這些 qos 可以給各種 DCPS 實例((topic, data writer, data reader, publisher, subscriber, domain participant) 然而不是所有的 qos 是對所有的實體是有效的。
 
-訂閱者和發布者使用請求 - 提供（RxO）模型來匹配。
+Subscribers and publishers 使用 equest-versus-offered (RxO) model 來配對。
+訂閱者請求一組最低限度需要的qos。 發布者向潛在訂戶提供一組QoS。 DDS實現嘗試將所有的需求和提供的 qos 配對; 如果這些 qos 是兼容的，則形成關聯。
 
-訂閱者請求一組最低限度需要的策略。 發布者向潛在訂戶提供一組QoS策略。 然後，DDS實現嘗試將所請求的策略與所提供的策略進行匹配; 如果這些策略是兼容的，則形成關聯。
-
-OpenDDS當前實現的QoS策略將在第3章中詳細討論。
+OpenDDS當前實現的 QoS 將在第3章中詳細討論。
 
 ## 1.1.4 Listeners
 
-DCPS層為每個實體定義回調接口，其允許應用進程“監聽”關於該實體的某些狀態改變或事件。 例如，當有可用於讀取的數據值時，通知數據讀取器偵聽器。
+DCPS層為每個實體定義回調接口，其允許應用進程“監聽”關於該實體的某些狀態改變或事件。 例如，當有可用於讀取的數據值時，通知 Data Reader Listener。
 
-### 1.1.5條件
+### 1.1.5 Conditions
 
 條件和等待集允許在偵聽DDS中感興趣的事件時使用偵聽器的替代方案。 一般模式是應用程序創建一個特定類型的Condition對象，例如StatusCondition，並將其附加到WaitSet。
 
