@@ -484,7 +484,7 @@ Windows:
 %DDS_ROOT%\bin\DCPSInfoRepo -o simple.ior
 ```
 
- Unix:
+Unix:
 
 ```cpp
 $DDS_ROOT/bin/DCPSInfoRepo -o simple.ior
@@ -517,6 +517,141 @@ Unix:
 ```cpp
 ./publisher -DCPSInfoRepo file://simple.ior
 ```
+
+發布者連接到DCPSInfoRepo以查找任何訂戶的位置，並開始發布消息以及將它們寫入控制台。 在訂閱者窗口中，您現在還應該看到來自訂閱者的控制台輸出，該訂閱者正在閱讀主題的消息，演示一個簡單的發布和訂閱應用程序。
+
+您可以閱讀第7.3.3節和第7.4.5.5節中有關為RTPS和其他更高級的配置選項配置應用程序的更多信息。 要了解有關配置和使用DCPSInfoRepo的更多信息，請參閱第7.3節和第9章。有關設置和使用修改應用程序行為的QoS功能的更多信息，請參閱第3章。
+
+## 2.1.8使用RTPS運行我們的示例
+
+之前的OpenDDS示例演示瞭如何使用基本的OpenDDS配置和使用DCPSInfoRepo服務的集中發現構建和執行OpenDDS應用程序。以下詳細描述了使用RTPS運行同一示例進行發現和可互操作傳輸所需要的。這在您的OpenDDS應用程序需要與DDS規範的非OpenDDS實現互操作的情況下，或者如果您不想在您的OpenDDS部署中使用集中式發現，這是非常重要的。
+
+上面的Messenger示例的編碼和構建沒有更改為使用RTPS，因此您不需要修改或重建您的發布商和訂閱服務。這是OpenDDS架構的一個優點，就是為了啟用RTPS功能，它是一個配置練習。第7章將介紹有關所有可用傳輸（包括RTPS）的配置的更多詳細信息，但是，對於本練習，我們將使用發布者和訂戶將共享的配置文件為Messenger示例啟用RTPS。
+
+導航到您的發布商和訂閱者已建立的目錄。創建一個名為rtps.ini的新文本文件，並使用以下內容填充它：
+
+> \[common\]
+>
+> DCPSGlobalTransportConfig=$file
+>
+> DCPSDefaultDiscovery=DEFAULT\_RTPS
+
+> \[transport/the\_rtps\_transport\]
+>
+> transport\_type=rtps\_udp
+
+在接下來的章節中指定了配置文件的更多細節，但是需要調用兩條感興趣的行來將發現方法和數據傳輸協議設置為RTPS。
+
+現在讓我們通過先啟動訂閱者進程然後再通過發布者開始發送數據來重新運行我們的RTPS示例。 最好在單獨的窗口中啟動它們，以分別查看兩個工作。
+
+使用-DCPSConfigFile命令行參數啟動訂戶以指向新創建的配置文件...
+
+Windows: 
+
+```
+subscriber -DCPSConfigFile rtps.ini 
+```
+
+Unix:
+
+```
+./subscriber -DCPSConfigFile rtps.ini
+```
+
+**現在使用相同的參數啟動發布商...**
+
+Windows:
+
+```
+publisher -DCPSConfigFile rtps.ini 
+```
+
+Unix: 
+
+```
+./publisher -DCPSConfigFile rtps.ini
+```
+
+由於在RTPS規範中沒有集中式發現，因此有允許等待時間允許發現發生的規定。 規格將默認值設置為30秒。 當開始兩個上述過程時，可能有多達30秒的延遲，這取決於它們彼此相隔多遠開始。 此時間可以在稍後討論的第7.3.3節中討論的OpenDDS配置文件中進行調整。
+
+由於OpenDDS的架構允許可插拔發現和可插入傳輸，上面rtps.ini文件中調用的兩個配置條目可以使用RTPS單獨更改，另一個不使用RTPS（例如使用DCPSInfoRepo的集中式發現）。 在我們的示例中將它們都設置為RTPS使得此應用程序與其他非OpenDDS實現完全可互操作。
+
+# 2.2數據處理優化
+
+## 2.2.1在發布服務器中註冊和使用實例
+
+前面的示例隱式地指定它通過樣本的數據字段發布的實例。 當`write()`被調用時，數據寫入器查詢樣本的關鍵字段以確定實例。 發布者還可以通過在數據寫入程序上調用`register_instance()`來顯式註冊實例：
+
+```cpp
+Messenger::Message message;
+ message.subject_id = 99;
+ DDS::InstanceHandle_t handle =
+  message_writer->register_instance(message);
+```
+
+在填充消息結構之後，我們調用`register_instance()`函數註冊實例。 實例由subject\_id值99標識（因為我們之前將該字段指定為鍵）。我們稍後可以在發布樣本時使用返回的實例句柄：
+
+```cpp
+DDS::ReturnCode_t ret = data_writer->write(message, handle);
+```
+
+使用實例句柄發布樣本可能比強制編寫器查詢實例稍微更有效，並且在實例上發布第一個樣本時效率更高。 沒有顯式註冊，第一次寫入會導致OpenDDS為該實例分配資源。
+
+由於資源限制可能導致實例註冊失敗，因此許多應用程序會將註冊視為設置發布者的一部分，並在初始化數據寫入器時始終執行此操作。
+
+## 2.2.2讀取多個樣本
+
+DDS規範提供了用於讀取和寫入數據樣本的多個操作。 在上面的示例中，我們使用了`take_next_sample()`操作來讀取下一個示例，並從讀取器“獲取”它的所有權。 消息數據閱讀器還具有以下操作。
+
+•take\(\) - 從讀取器獲取最多max\_samples個值的序列
+
+•take\_instance\(\) - 為指定實例獲取一系列值
+
+•take\_next\_instance\(\) - 獲取屬於同一實例的一系列樣本，而不指定實例。
+
+還有對應於獲得相同值的這些“獲取”操作中的每一個的“讀取”操作，但將樣本留在讀取器中，並且簡單地在SampleInfo中將它們標記為讀取。
+
+由於這些其他操作讀取一系列值，所以當樣本快速到達時，它們更有效。 這裡是一個示例調用`take()`，一次最多讀取5個樣本。
+
+```cpp
+MessageSeq messages(5);
+ DDS::SampleInfoSeq sampleInfos(5);
+ DDS::ReturnCode_t status =
+  message_dr->take(messages, sampleInfos, 5, DDS::ANY_SAMPLE_STATE, DDS::ANY_VIEW_STATE, DDS::ANY_INSTANCE_STATE);
+```
+
+三個狀態參數潛在地專門化從讀取器返回哪些樣本。有關其用法的詳細信息，請參閱DDS規範。
+
+ 2.2.3零複製讀
+
+返回樣本序列的讀取和獲取操作向用戶提供獲得樣本的副本（單拷貝讀取）或對樣本的引用（零拷貝讀取）的選項。與大型樣品類型的單拷貝讀取相比，零拷貝讀取可以顯著提高性能。測試顯示，使用零拷貝讀取，8KB或更小的樣本不會獲得太多，但在小樣本上使用零拷貝幾乎沒有性能損失。
+
+應用程序開發人員可以通過使用max\_len為零構造的樣本序列調用`take()`或`read()`來指定零拷貝讀取優化的使用。消息序列和样本信息序列構造函數都使用max\_len作為它們的第一個參數，並指定默認值0。以下示例代碼取自DevGuideExamples / DCPS / Messenger\_ZeroCopy / DataReaderListenerImpl.cpp：
+
+```cpp
+Messenger::MessageSeq messages;
+ DDS::SampleInfoSeq info;
+ // get references to the samples (zero-copy read of the samples)
+ DDS::ReturnCode_t status = dr->take(messages,info, DDS::LENGTH_UNLIMITED, DDS::ANY_SAMPLE_STATE, DDS::ANY_VIEW_STATE, DDS::ANY_INSTANCE_STATE);
+```
+
+在零拷貝讀取/讀取和單拷貝讀取/讀取之後，樣本和信息序列的長度被設置為讀取的樣本數。 對於零拷貝讀操作，**max\_len設置為值&gt; = length。**
+
+由於應用程序代碼要求數據的零拷貝貸款，它必須在完成數據後返回該貸款：
+
+```
+dr->return_loan(messages, info);
+```
+
+調用`return_loan()`會導致序列的`max_len`設置為0，並且其自己的成員設置為`false`，允許相同的序列用於另一個零拷貝讀取。
+
+如果數據樣本序列構造函數和info序列構造函數的第一個參數更改為大於零的值，則返回的樣本值將是副本。當複制值時，應用程序開發人員可以調用`return_loan()`，但不是必須這樣做。
+
+如果未指定序列構造函數的`max_len(first)`參數，那麼缺省值為0;因此使用零拷貝讀取。因為這個默認值，當它被銷毀時，序列將自動調用`return_loan()`。為了符合DDS規範並且可移植到DDS的其他實現，應用程序不應該依賴於此自動`return_loan()`功能。
+
+樣本和信息序列的第二個參數是序列中可用的最大時隙。如果`read()`或`take()`操作的`max_samples`參數大於此值，則`read()`或`take()`返回的最大樣本將受序列構造函數的此參數限制。
+
+雖然應用程序可以通過調用`length(len)`操作來更改零拷貝序列的長度，但建議不要這樣做，因為此調用會導致複製數據並創建單拷貝樣本序列。
 
 
 

@@ -1,6 +1,7 @@
 # Summary
 
-* [Introduction](README.md)
+* [1.Introduction](README.md)
 * [QuickStart](quickstart.md)
-* [Getting Started](getting-started.md)
+* [2.Getting Started](getting-started.md)
+* [3.Quality of Service](3quality-of-service.md)
 
