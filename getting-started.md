@@ -36,7 +36,7 @@ DCPS\_DATA\_KEY pragma標識用作此類型的鍵的DCPS數據類型的字段。
 
 OpenDDS IDL首先由TAO IDL編譯器處理。
 
-`tao_idl Messenger.idl`
+`tao_idl Messenger.idl`
 
 此外，我們需要使用OpenDDS IDL編譯器處理IDL文件，以生成OpenDDS需要編譯和解密消息的序列化和密鑰支持代碼，以及數據讀取器和寫入器的類型支持代碼。 此IDL編譯器位於$ DDS\_ROOT / bin /中，並為每個處理的IDL文件生成三個文件。 這三個文件都以原始IDL文件名開頭，顯示如下：
 
@@ -161,7 +161,7 @@ CORBA::String_var type_name = mts->get_type_name ();
  if (!topic) {
   std::cerr << "create_topic failed." << std::endl;
   return 1;
- } 
+ }
 ```
 
 我們已經創建了一個名為“電影討論列表”的主題，註冊類型和默認QoS策略。
@@ -197,6 +197,92 @@ if (!pub) {
   return 1;
  }
 ```
+
+當我們創建數據寫入器時，我們傳遞主題對象引用，默認QoS策略和空偵聽器引用。 我們現在將數據寫入器引用縮小到**MessageDataWriter**對象引用，以便我們可以使用特定於類型的發布操作。
+
+```cpp
+Messenger::MessageDataWriter_var message_writer =
+ Messenger::MessageDataWriter::_narrow(writer);
+```
+
+示例代碼使用條件和等待集，以便發布者等待訂閱者連接並完全初始化。 在這樣的簡單示例中，無法等待訂戶可能導致發布者在訂閱者連接之前發布其樣本。
+
+等待用戶所涉及的基本步驟是：
+
+1）從我們創建的數據寫入器獲取狀態條件
+
+2）在條件中啟用“發布匹配”狀態
+
+3）創建等待集
+
+4）將狀態條件附加到等待集合
+
+5）獲取發布匹配狀態
+
+6）如果匹配的當前計數為一個或多個，則從等待集中分離條件並繼續發布
+
+7）等待等待集（可以被指定的時間段限制）
+
+8）循環回到步驟5
+
+這裡是相應的代碼：
+
+```cpp
+// Block until Subscriber is available
+ DDS::StatusCondition_var condition =
+  writer->get_statuscondition();
+  condition>set_enabled_statuses(
+  DDS::PUBLICATION_MATCHED_STATUS);
+ DDS::WaitSet_var ws = new DDS::WaitSet;
+ ws->attach_condition(condition);
+ while (true) {
+  DDS::PublicationMatchedStatus matches;
+  if (writer->get_publication_matched_status(matches)
+    != DDS::RETCODE_OK) {
+   std::cerr << "get_publication_matched_status failed!"
+             << std::endl;
+   return 1;
+  }
+ if (matches.current_count >= 1) {
+   break;
+ }
+ DDS::ConditionSeq conditions;
+ DDS::Duration_t timeout = { 60, 0 };
+ if (ws->wait(conditions, timeout) != DDS::RETCODE_OK) {
+   std::cerr << "wait failed!" << std::endl;
+   return 1;
+  }
+ }
+ ws->detach_condition(condition);
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
