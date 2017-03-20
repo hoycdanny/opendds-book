@@ -2,13 +2,14 @@
 
 ### **Introduction**
 
-OpenDDS是用於即時系統規範v1.4（OMG文件格式/ 2015-04-10）的OMG數據分發服務（DDS）和即時發布 - 訂閱有線協定DDS互操作性有線協定規範（DDSI）的開放原始碼實現 -RTPS）v2.2（OMG文件格式/ 2014-09-01）。 OpenDDS由Object Computing，Inc。（OCI）贊助，可在[http://www.opendds.org/](http://opendds.org/)獲得。 本開發人員指南基於OpenDDS的3.10版本。
 
-DDS定義用於在分佈式應用中的參與者之間有效地分發應用數據的服務。 此服務不是特定於CORBA的。 規範提供了平台獨立模型（PIM）以及將PIM映射到CORBA IDL實現的平台特定模型（PSM）。
+OpenDDS是建立於 OMG Data Distribution Service (DDS) 的 Real-Time Systems V1.4(OMG 文件格式/2015-04-10) 和 Real-time Publish-Subscribe Wire Protocol DDS Interoperability Wire Protocol Specification(DDSI-RTPS) v2.2 (OMG Document formal/2014-09-01)。OpenDDS 是由 Object Computing, Inc. (OCI) 贊助。 Opendds 網址為[http://www.opendds.org/](http://opendds.org/)。開發人員指南基於 3.10 釋出版本的 Opendds。
 
-有關DDS的其他詳細信息，開發人員應參考DDS規範（OMG文檔格式/ 2015-04-10），因為它包含對所有服務的功能的深入涵蓋。
+DDS 的定義為在分散式的應用程式有效的傳輸分散式的應用程式資料。這個服務不特定為 CORBA 。提供 Platform Independent Model (PIM) 以及將 Platform Specific Model (PSM) 映射成 CORBA IDL。
 
-OpenDDS是OCI開發和商業支持的OMG的DDS規範的開源C ++實現。 它可從[http://www.opendds.org/downloads.html](http://www.opendds.org/downloads.html)下載，並與OCI TAO 2.0a和2.2a的最新補丁級別以及最新的DOC Group版本相容。
+有關DDS的其他詳細信息，開發人員應參考DDS規範（OMG文件格式/ 2015-04-10），因為它包含對所有服務的功能的深入涵蓋。
+
+OpenDDS 是 C++ 所寫的開原軟體，OCI 提供 OMG's DDS 規範開發和商業支持。能夠從[http://www.opendds.org/downloads.html](http://www.opendds.org/downloads.html)下載和 OCI TAO version 2.0a and 2.2a 級別的補丁以及最新的文件。
 
 注意:OpenDDS目前實現OMG DDS 1.4版規範。 有關詳細訊息，請參閱[http://www.opendds.org/](http://www.opendds.org/)中的規格訊息。
 
@@ -18,19 +19,19 @@ OpenDDS是OCI開發和商業支持的OMG的DDS規範的開源C ++實現。 它�
 
 ## 1.1.1基本概念
 
-圖1-1顯示了DDS DCPS層的概述。 以下小節定義了此圖中所示的概念。
+圖1-1顯示了DDS DCPS層的概述。 子節點的概念定義再下面那張圖中所示。
 
 ### ![](/1.1.jpg)
 
 ### 1.1.1.1 Domain
 
-domain是DCPS中的基本分區單元。 每個其他實體屬於一個domain，並且只能與該domain中的其他實體相互影響。
+Domain 是 DCPS 中的基本分區單元。每個實體屬於一個domain，並且只能與該 domain 中的其他實體相互影響。
 
-應用程序代碼可以與多個domain自由交互，但必須通過屬於不同domain的單獨實體進行相互影響。
+程式碼可以自由的與多個 domain 作用，但必需藉由分離不同 domain 的實體來做到。
 
 ### 1.1.1.2 DomainParticipant
 
-domain參與者是應用程序在特定domain內交互的入口點。 domain參與者是牽涉到寫入或讀取數據的許多對象的工廠。
+domain participant是應用程序與特定的 domain 互相作用的入口點。domain participant 是個工廠給許多物件參與讀取寫入的地方。
 
 ### 1.1.1.3主題
 
