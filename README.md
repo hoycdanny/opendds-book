@@ -250,51 +250,54 @@ mwc.pl -type <type> -features feature = 0 DDS.mwc 或者，將 line feature = 0 
 
 ### 1.3.3禁用合規性配置文件特性的建立
 
-DDS規範定義了遵從性概況以提供用於指示DDS實現可能支持或可能不支持的某些特徵集合的通用術語。以下給出這些配置文件以及用於禁用對該配置文件或該配置文件的組件的支持的MPC功能的名稱。
+DDS規範定義了遵從性概況以提供用於指示DDS實現可能支持或可能不支持的某些特徵集合的通用術語。 
+DDS規範定義了 compliance profiles 提供一般術語指示哪些特定的設定 DDS 可能不會支援。
+這些配置文件以及用於禁用支持的 MPC 功能的名稱為該配置文件或該配置文件的組件
 
-許多配置文件選項涉及QoS設置。如果嘗試使用與禁用的配置文件不兼容的QoS值，則會發生運行時錯誤。如果配置文件涉及類，則如果嘗試使用該類並禁用配置文件，則會發生編譯時錯誤。
+許多配置文件選項涉及QoS設置。如果嘗試使用不啟用的文件 QOS 的值將會發生運行錯誤。如果配置文件涉及不啟用的 class 則會發生編譯錯誤。
 
 #### 1.3.3.1內容訂閱配置文件
 
-功能名稱：content\_subscription
+特徵名稱：content_subscription
 
-此配置文件添加第5章中討論的類ContentFilteredTopic，QueryCondition和MultiTopic。此外，可以通過使用下表中給出的功能來排除個別類。
+此配置文件添加第5章中ContentFilteredTopic, QueryCondition, 和 MultiTopic
+discussed。此外，可以執行使用該功能參照下表。
 
 **Table 1-2: Content-Subscription Class Features**
 
 | Class | Feature |
 | :--- | :--- |
-| ContentFilteredTopic | content\_filtered\_topic |
-| QueryCondition | query\_condition |
-| MultiTopic | multi\_topic |
+| ContentFilteredTopic | content_filtered_topic |
+| QueryCondition | query_condition |
+| MultiTopic | multi_topic |
 
 #### 1.3.3.2持續性簡介
 
-功能名稱：persistence\_profile
+特徵名稱：persistence_profile
 
-此配置文件添加QoS策略DURABILITY\_SERVICE和DURABILITY QoS策略類型的設置“TRANSIENT”和“PERSISTENT”。
+此配置文件添加 QoS 方針 DURABILITY_SERVICE 和 QoS類型設置 “TRANSIENT” 和 “PERSISTENT” 。
 
 #### 1.3.3.3所有權簡介
 
-功能名稱：ownership\_profile
+特徵名稱：ownership_profile
 
 此配置文件添加：
 
-•所有權類型的設置“EXCLUSIVE”
+•所有權類型的設置 “EXCLUSIVE”
 
-•支持OWNERSHIP\_STRENGTH策略
+•支援 OWNERSHIP_STRENGTH
 
-•為HISTORY QoS策略設置深度&gt; 1。
+•為HISTORY QoS 設置 depth>1。
 
-**注意:**目前，即使已禁用ownership\_profile，仍支持HISTORY 深度&gt; 1的OpenDDS代碼。
+**注意:**目前，即使已禁用ownership_profile，仍支持HISTORY depth>1的 OpenDDS 代碼。
 
 #### 1.3.3.4對像模型概要
 
-功能名稱：object\_model\_profile
+特徵名稱：object_model_profile
 
-此配置文件包括對“GROUP”的presentENTATION access\_scope設置的支持。
+此配置文件包括對“GROUP”的 PRESENTATION access_scope設置支援。
 
-**注意:**目前，當object\_model\_profile被禁用時，“TOPIC”的PRESENTATION access\_scope也被排除。
+**注意:**目前，當object_model_profile被禁用時， PRESENTATION access_scope 的 "TOPIC" 也被排除。
 
 
 
