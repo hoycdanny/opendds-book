@@ -1,4 +1,4 @@
-# CHAPTER 5 
+# CHAPTER 5
 
 # Content-Subscription Profile
 
@@ -40,7 +40,7 @@ DDS的內容訂閱簡檔由三個特徵組成，這三個特徵使得數據讀�
 
 一旦已經創建了內容過濾的主題，它被訂戶的`create_datareader()`操作用來獲得內容過濾數據讀取器。該數據讀取器在功能上等同於正常數據讀取器，除了丟棄不滿足過濾器表達式準則的傳入數據樣本。
 
-首先在發布者處評估過濾器表達式，以便可以在甚至到達傳輸之前刪除用戶可以忽略的數據樣本。可以使用-`DCPSPublisherContentFilter 0`或配置文件的`[common]`部分中的等效設置關閉此功能。非默認`DEADLINE`或`LIVELINESS `QoS策略的行為可能受此策略的影響。必須特別注意“丟失”樣本如何影響QoS行為，請參閱`docs / design / CONTENT_SUBSCRIPTION`中的文檔。
+首先在發布者處評估過濾器表達式，以便可以在甚至到達傳輸之前刪除用戶可以忽略的數據樣本。可以使用-`DCPSPublisherContentFilter 0`或配置文件的`[common]`部分中的等效設置關閉此功能。非默認`DEADLINE`或`LIVELINESS`QoS策略的行為可能受此策略的影響。必須特別注意“丟失”樣本如何影響QoS行為，請參閱`docs / design / CONTENT_SUBSCRIPTION`中的文檔。
 
 **注意:**RTPS傳輸不總是做寫入器端過濾。 它當前不實現傳輸級過濾，但可以能夠在傳輸層上方進行過濾。
 
@@ -54,17 +54,17 @@ DDS的內容訂閱簡檔由三個特徵組成，這三個特徵使得數據讀�
 
 •&lt;arg1&gt; &lt;RelOp&gt; &lt;arg2&gt;
 
-- arg1和arg2是可以是文字值（整數，字符，浮點數，字符串或枚舉）的參數，形式為％n的參數佔位符（其中n是基於從零開始的索引到參數序列中） ，或字段參考。
+* arg1和arg2是可以是文字值（整數，字符，浮點數，字符串或枚舉）的參數，形式為％n的參數佔位符（其中n是基於從零開始的索引到參數序列中） ，或字段參考。
 
-- 至少一個參數必須是字段引用，它是IDL結構字段的名稱，可選地後跟任意數量的“。”和另一個表示嵌套結構的字段名稱。
+* 至少一個參數必須是字段引用，它是IDL結構字段的名稱，可選地後跟任意數量的“。”和另一個表示嵌套結構的字段名稱。
 
-- RelOp是來自列表的關係運算符：=，&gt;，&gt; =，&lt;，&lt;=，&lt;&gt;和“like”。 'like'是一個通配符匹配，使用％匹配任意數量的字符和\_匹配單個字符。
+* RelOp是來自列表的關係運算符：=，&gt;，&gt; =，&lt;，&lt;=，&lt;&gt;和“like”。 'like'是一個通配符匹配，使用％匹配任意數量的字符和\_匹配單個字符。
 
-- 這種形式的謂詞的示例包括：a ='z'，b &lt;&gt;'str'，c &lt;d，e ='enumerator'，f&gt; = 3.14e3,27g，h &lt; 0
+* 這種形式的謂詞的示例包括：a ='z'，b &lt;&gt;'str'，c &lt;d，e ='enumerator'，f&gt; = 3.14e3,27g，h &lt; 0
 
 •&lt;arg1&gt; \[NOT\] BETWEEN &lt;arg2&gt; AND &lt;arg3&gt;
 
-- 在此形式中，參數1必須是字段引用，參數2和3必須都是文字值或參數佔位符。
+* 在此形式中，參數1必須是字段引用，參數2和3必須都是文字值或參數佔位符。
 
 任何數量的謂詞可以通過使用括號和布爾運算符AND，OR和NOT組合形成一個過濾器表達式。
 
@@ -185,29 +185,29 @@ DataReader接口包含用於創建（`create_querycondition`）和刪除（`dele
 
 主題表達式使用與完整SQL查詢非常相似的語法：
 
-`SELECT <aggregation> FROM <selection> [WHERE <condition>]`
+`SELECT <aggregation> FROM <selection> [WHERE <condition>]`
 
 •聚合可以是“\*”或逗號分隔的字段說明符列表。 每個字段說明符具有以下語法：
 
-- `<constituent_field> [[AS] <result_field>]]`
+* `<constituent_field> [[AS] <result_field>]]`
 
-- `constituent_field`是一個字段的字段引用（見第1.1.1節）
+* `constituent_field`是一個字段的字段引用（見第1.1.1節）
 
 組成主題（該主題未指定）。
 
-- 可選的結果字段是對結果類型中字段的字段引用。 如果存在，結果字段是構造的樣本中的`constituent_field`的目的地。 如果不存在，則在所得到的類型中將constituent\_field數據分配給具有相同名稱的字段。 可選的“AS”沒有效果。
+* 可選的結果字段是對結果類型中字段的字段引用。 如果存在，結果字段是構造的樣本中的`constituent_field`的目的地。 如果不存在，則在所得到的類型中將constituent\_field數據分配給具有相同名稱的字段。 可選的“AS”沒有效果。
 
-- 如果使用“\*”作為聚合，則結果類型中的每個字段都將從構成主題類型之一的同名字段中分配值。
+* 如果使用“\*”作為聚合，則結果類型中的每個字段都將從構成主題類型之一的同名字段中分配值。
 
 •選擇列出一個或多個組成主題名稱。 主題名稱由“join”關鍵字分隔（所有3個連接關鍵字都是等效的）：
 
-- `<topic> [{NATURAL INNER | 自然| INNER NATURAL} JOIN <topic>]` ...
+* `<topic> [{NATURAL INNER | 自然| INNER NATURAL} JOIN <topic>]` ...
 
-- 主題名稱只能包含字母，數字和短劃線（但不能以數字開頭）。
+* 主題名稱只能包含字母，數字和短劃線（但不能以數字開頭）。
 
-- 自然連接操作是可交換和關聯的，因此主題的順序沒有影響。
+* 自然連接操作是可交換和關聯的，因此主題的順序沒有影響。
 
-- 自然聯接的語義是，具有相同名稱的任何字段被視為“連接鍵”，用於組合來自這些鍵出現的主題的數據。 在本章的後續章節中將更詳細地描述聯接操作。
+* 自然聯接的語義是，具有相同名稱的任何字段被視為“連接鍵”，用於組合來自這些鍵出現的主題的數據。 在本章的後續章節中將更詳細地描述聯接操作。
 
 •條件具有與過濾器表達式完全相同的語法和語義（請參見第5.2.1節）。 條件中的字段引用必須匹配結果類型中的字段名稱，而不匹配組成主題類型中的字段名稱。
 
@@ -311,9 +311,26 @@ struct Resulting {
 ResultingTypeSupport_var ts_res = new ResultingTypeSupportImpl;
  ts_res->register_type(dp, "");
  CORBA::String_var type_name = ts_res->get_type_name();
- DDS::MultiTopic_var mt =
- dp->create_multitopic("MyMultiTopic",type_name,"SELECT flight_name, x, y, z AS height " "FROM Location NATURAL JOIN FlightPlan " "WHERE height < 1000 AND x<23",DDS::StringSeq());
+ DDS::MultiTopic_var mt = dp->create_multitopic("MyMultiTopic",type_name,"SELECT flight_name, x, y, z AS height " "FROM Location NATURAL JOIN FlightPlan " "WHERE height < 1000 AND x<23",DDS::StringSeq());
  DDS::DataReader_var dr = sub->create_datareader(mt,DATAREADER_QOS_DEFAULT, NULL, OpenDDS::DCPS::DEFAULT_STATUS_MASK);
+```
+
+### 5.4.3.3使用多主題數據讀取器讀取數據
+
+從API的角度來看，多主題數據讀取器對於結果類型的任何其他類型數據讀取器是相同的。 此示例使用等待集和讀取條件，以阻止，直到數據可用。
+
+```cpp
+ DDS::WaitSet_var ws = new DDS::WaitSet;
+ DDS::ReadCondition_var rc = dr->create_readcondition(DDS::ANY_SAMPLE_STATE,DDS::ANY_VIEW_STATE, DDS::ANY_INSTANCE_STATE);
+ ws->attach_condition(rc);
+ DDS::Duration_t infinite = {DDS::DURATION_INFINITE_SEC, DDS::DURATION_INFINITE_NSEC};
+ DDS::ConditionSeq active;
+ ws->wait(active, infinite); // error handling not shown
+ ws->detach_condition(rc);
+ ResultingDataReader_var res_dr = ResultingDataReader::_narrow(dr);
+ ResultingSeq data;
+ DDS::SampleInfoSeq info;
+ res_dr->take_w_condition(data, info, DDS::LENGTH_UNLIMITED, rc);
 ```
 
 
