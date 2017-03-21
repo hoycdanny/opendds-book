@@ -177,7 +177,7 @@ ETF使應用程序開發人員能夠實現自己的定制傳輸。實現自定�
 
 ### 1.2.3.3 DDS發現
 
-DDS 應用程序必須通過某個中央代理或通過某種分佈式方案彼此發現。OpenDDS 的一個重要特性是，DDS 應用程序可以配置為使用 DCPSInfoRepo 或 RTPS discovery 執行，利用不同的傳輸類型在數據寫入器和數據讀取器之間進行數據傳輸。OMG DDS 規範（formal/ 2015-04-10）將發現的細節留給實現。在 DDS 實現之間的互操作性的情況下，OMG DDSI-RTPS（formal/ 2014-09-01）規範提供了對等發現的對等方式的要求。
+DDS 應用程序必須通過某個中央代理或通過某種分佈式方案彼此發現。一個 OpenDDS 重要的特點就是 DDS 應用可以設定去執行 DCPSInfoRepo 或 RTPS discovery 來做發現，但利用不同的傳輸形式和資料型態在資料讀取與資料寫入。OMG DDS 格式 (formal/2015-04-10) 留下了發現的實作細節。在 DDS 實現之間的互操作性的情況下，OMG DDSI-RTPS（formal/ 2014-09-01）規範提供了對等發現的對等方式的要求。
 
 OpenDDS 提供兩個發現選項。
 
@@ -200,54 +200,53 @@ OpenDDS實現一個稱為DCPS的獨立訊息服務（DCPSInfoRepo）實現集中
 ### RTPS 的點對點發現
 
 DDS 的點對點模式可相容於 OpenDDS 的模式。此方法可由當前版本的 RTPS 協議來實現。這種簡單的發現形式是通過簡單的 DDS 應用設定完成讀取資料和寫入資料會顯示錯誤：找不到參考源。
+每個參與形成都會啟動 DDSI—RTPS 資料讀寫的發現機制，預設或是設定的網路阜號這樣 DDS 參與者可以開始廣播它的資料讀取接收是可以使用的。一段時間後，基於標準找到彼此和討論設定基本連接設定插件在 Extensible Transport Framework (ETF)之中。這種靈活配置方法的更詳細描述在第7.4.1.1節和第7.4.5.5節中討論。
 
-這種簡單的發現形式是通過在應用程序進程中運行的DDS應用程序數據讀取器和數據寫入程序的簡單配置來實現的，如錯誤：未找到參考源。由於每個參與的進程為其數據讀取器和寫入器激活OpenDDS中的DDSI-RTPS發現機制，因此使用默認或配置的網絡端口來創建網絡端點，使得DDS參與者可以開始廣告其數據讀取器和數據寫入器的可用性。在一段時間之後，基於標準尋找彼此的那些將彼此找到並且基於如在可擴展傳輸框架（ETF）中討論的配置的可插入傳輸建立連接。這種靈活配置方法的更詳細描述在第7.4.1.1節和第7.4.5.5節中討論。
+以下是開發人員開發和佈署 RTPS discovery 應用時要考慮的限制：
+1）使用 UDP 阜來指定的 Domain ID 只能從 0到231（包含）。每個 Opendds 程序只能包含 120 個 doamin 。
 
-以下是開發人員在開發和部署使用RTPS發現的應用程序時需要考慮的其他實現限制：1）由於UDP端口分配給域ID的方式，域ID應在0到231（含）之間。在每個OpenDDS流程中，每個域中最多支持120個域參與者。
+2）topic 和型態辨識只能小於 256 的字元
 
-2）主題名稱和類型標識符限制為256個字符。
+3）OpenDDS 本機嘗試 RTPS Discovery 不執行因為 GUID 已分配（如果嘗試，將發出警告）。
 
-3）由於分配GUID的方式（如果嘗試，將發出警告），OpenDDS的本地多播傳輸不與RTPS發現一起工作。
 
-關於RTPS發現如何發生的更多細節，可以在實時發布 - 訂閱有線協議DDS互操作性有線協議規範（DDSI-RTPS）v2.2（OMG文件格式/ 2014 -09-01）。
+關於更多 RTPS discover 問題，可以再章節8.5的 Real-time Publish-Subscribe Wire Protocol DDS Interoperability Wire Protocol Specification (DDSI-RTPS) v2.2 (OMG Document formal/2014-09-01)找到很好的參考。
 
 ### 1.2.3.4 Threading
 
-OpenDDS創建自己的ORB（當需要一個ORB時）以及運行該ORB的單獨的線程。 它還使用自己的線程來處理傳入和傳出傳輸I / O。 創建單獨的線程以在意外連接關閉時清除資源。 您的應用程序可能會通過DCPS的偵聽器機制從這些線程中調用。
-
-當通過DDS發布樣本時，OpenDDS通常嘗試使用調用線程將樣本發送到任何已連接的訂閱者。 如果發送調用塊，則樣本可以排隊等待在單獨的服務線程上發送。 此行為取決於第3章中描述的QoS策略。
-
-訂戶中的所有傳入數據由服務線程讀取並排隊等待應用程序讀取。 從服務線程調用DataReader偵聽器。
+OpenDDS 創建自己的  ORB（當他需要一個）以及從正再執行的 ORB 上分離。它還使用自己的線程來處理傳入和傳出傳輸 I/O。創建單獨的線程以在意外連接關閉時清除資源。可以從 DCPS 來監聽線程。
+當透過 DDS 發佈範例時，OpenDDS 使用呼叫行程來執行一般嘗試發送範例到所有以連線的訂閱者。如果使用呼叫區塊，範例可以被排到分配發送服務線程。此行為取決於第3章中描述的QoS。
+所有訂閱者接收的資料都由服務程序並由應用程式排程。從服務線程調用 DataReader 偵聽器。
 
 ### 1.2.3.5配置
 
-OpenDDS包括一個基於文件的配置框架，用於配置全局項，如調試級別，內存分配和發現，以及發布商和訂閱者的傳輸實現詳細信息。配置也可以直接在代碼中實現，但是，建議將配置外部化，以便於維護和減少運行時錯誤。第7章介紹了完整的配置選項集。
+OpenDDS包括一個基於文件的配置框架，用於配置全域，如調試級別，內存分配和發現，以及發布商和訂閱者的傳輸實現詳細信息。配置也可以直接在代碼中實現，但是，建議將配置外部化，以便於維護和減少運行時錯誤。第7章介紹了完整的配置選項集。
 
 ## 1.3安裝
 
-有關如何構建OpenDDS的步驟可以在$ DDS\_ROOT / INSTALL中找到。為了避免編譯您不會使用的OpenDDS代碼，有一些功能比可以從構建中排除。下面討論這些特徵。需要小尺寸配置或與安全性平台兼容性的用戶應考慮使用本指南第13章中所述的OpenDDS安全配置文件。
+有關如何構建OpenDDS的步驟可以在 $DDS\ROOT\INSTALL 中找到。為了避免編譯您不會使用的OpenDDS代碼，有一些功能比可以從構建中排除。下面討論這些。需要小尺寸配置或與安全性平台兼容性的用戶應考慮使用本指南第13章中所述的OpenDDS安全配置文件。
 
 ### 1.3.1啟用或禁用功能的構建
 
-大多數功能都由configure腳本支持。 configure腳本創建具有正確內容的配置文件，然後運行MPC。如果使用configure腳本，請使用“--help”命令行選項運行它，並查找要啟用/禁用的功能。
+大多數功能都由 configure script 支持。 configure script 創建具有正確內容的配置文件，然後運行 MPC。如果使用configure script，請使用“--help”命令行選項運行它，並查找要啟用/禁用的功能。
 
 如果不使用configure腳本，請繼續閱讀以下有關直接運行MPC的說明。
 
-對於下述功能，MPC用於啟用（默認）功能或禁用功能。對於名為feature的功能部件，使用以下步驟從構建中禁用功能部件：
+對於下述功能，MPC用於啟用（默認）功能或禁用功能。對於名為feature的功能，使用以下步驟從構建中禁用功能：
 
 1）使用MPC的命令行“features”參數：
 
-mwc.pl -type &lt;type&gt; -features feature = 0 DDS.mwc或者，將line feature = 0添加到文件$ ACE\_ROOT / bin / MakeProjectCreator / config / default.features中，並使用MPC重新生成項目文件。
+mwc.pl -type <type> -features feature = 0 DDS.mwc 或者，將 line feature = 0 添加到文件 $ACE/ROOT/bin/MakeProjectCreator/config/default.features 中，並使用MPC重新生成項目文件。
 
-2）如果您使用gnuace MPC項目類型（如果您將使用GNU make作為您的構建系統，則是這種情況），請將文件$ ACE\_ROOT / include / makeinclude / platform\_macros.GNU中添加“feature = 0”。
+2）如果您使用gnuace MPC項目類型（如果您將使用GNU make作為您的構建系統，則是這種情況），請將文件 $ACE/ROOT/include/makeinclude/platform/macros.GNU 中添加“feature = 0”。
 
 要顯式啟用該功能，請使用上面的feature = 1。
 
-**注意:**您還可以使用$ DDS\_ROOT / configure腳本啟用或禁用功能。 要禁用該功能，請將--no-feature傳遞給腳本，以啟用pass -feature。 在這種情況下，在要素名稱中使用“ - ”而不是“\_”。 例如，要禁用下面討論的功能content\_subscription，請將-no-content-subscription傳遞給configure腳本。
+**注意:**您還可以使用 $DDS/ROOT/configure 腳本啟用或禁用功能。要禁用該功能，請將 --no-feature 傳遞給腳本，以啟用 pass --feature。在這種情況下，在名稱中使用“ - ”而不是“_”。 例如，要禁用下面討論的功能content_subscription，請將-no-content-subscription傳遞給configure腳本。
 
 ### 1.3.2禁用內置主題的構建
-
-支持功能名稱：built\_in\_topics通過禁用內置主題支持，可以將核心DDS庫的佔用空間減少高達30％。請參見第6章以確定是否構建沒有BIT支持。
+特徵名稱：built_in_topics
+你可以藉由禁用內置的 topic 減少 DDS 核心函數庫減少高達30% 。看第 6 章確定如果你不需要 BIT 支援。
 
 ### 1.3.3禁用合規性配置文件特性的建立
 
