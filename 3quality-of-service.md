@@ -155,12 +155,12 @@ if (DDS::RETCODE_OK != ret) {
 | LATENCY\_BUDGET | duration.sec                                            duration.nanosec | DURATION\_ZERO\_SEC                           DURATION\_ZERO\_NSEC |
 | LIVELINESS | kind                                                           lease\_duration.sec                                 lease\_duration.nanosec | AUTOMATIC\_LIVELINESS\_QOS            DURATION\_INFINITY\_SEC                    DURATION\_INFINITY\_NSEC |
 | RELIABILITY | kind                                                         max\_blocking\_time.sec                       max\_blocking\_time.nanosec | BEST\_EFFORT\_RELIABILITY\_QOS        DURATION\_INFINITY\_SEC                    DURATION\_INFINITY\_NSEC |
-| DESTINATION\_ORDER  | kind | BY\_RECEPTION\_TIMESTAMP\_             DESTINATIONORDER\_QOS |
-| HISTORY  | kind                                                          depth | KEEP\_LAST\_HISTORY\_QOS                  1 |
-| RESOURCE\_LIMITS | max\_samples                                        max\_instances                                     max\_samples\_per\_instance |  LENGTH\_UNLIMITED                             LENGTH\_UNLIMITED                            LENGTH\_UNLIMITED  |
-| USER\_DATA  | value  | \(empty sequence\) |
-| OWNERSHIP  | kind | SHARED\_OWNERSHIP\_QOS |
-| TIME\_BASED\_FILTER  | minimum\_separation.sec                     minimum\_separation.nanosec | DURATION\_ZERO\_SEC                           DURATION\_ZERO\_NSEC |
+| DESTINATION\_ORDER | kind | BY\_RECEPTION\_TIMESTAMP\_             DESTINATIONORDER\_QOS |
+| HISTORY | kind                                                          depth | KEEP\_LAST\_HISTORY\_QOS                  1 |
+| RESOURCE\_LIMITS | max\_samples                                        max\_instances                                     max\_samples\_per\_instance | LENGTH\_UNLIMITED                             LENGTH\_UNLIMITED                            LENGTH\_UNLIMITED |
+| USER\_DATA | value | \(empty sequence\) |
+| OWNERSHIP | kind | SHARED\_OWNERSHIP\_QOS |
+| TIME\_BASED\_FILTER | minimum\_separation.sec                     minimum\_separation.nanosec | DURATION\_ZERO\_SEC                           DURATION\_ZERO\_NSEC |
 | READER\_DATA\_LIFECYCLE | autopurge\_nowriter\_samples\_delay.sec                                                               autopurge\_nowriter\_samples\_delay.nanosec                                                       autopurge\_disposed\_samples\_delay.sec                                                             autopurge\_disposed\_samples\_delay.nanosec | DURATION\_INFINITY\_SEC                     DURATION\_INFINITY\_NSEC                 DURATION\_INFINITY\_SEC                    DURATION\_INFINITY\_NSEC |
 
 2.對於OpenDDS版本（最多2.0），數據寫入程序的默認可靠性類型是盡力而為。 對於版本2.0.1和更高版本，此更改為可靠（符合DDS規範）。
@@ -395,7 +395,7 @@ struct GroupDataQosPolicy {
 
 ## 3.2.14TRANSPORT\_PRIORITY
 
-`TRANSPORT_PRIORITY`策略通過它們各自的QoS策略結構的`transport_priority`成員應用於主題和數據寫入器實體。 以下是與`TransportPriority `QoS策略相關的IDL：
+`TRANSPORT_PRIORITY`策略通過它們各自的QoS策略結構的`transport_priority`成員應用於主題和數據寫入器實體。 以下是與`TransportPriority`QoS策略相關的IDL：
 
 ```cpp
 struct TransportPriorityQosPolicy {
@@ -415,7 +415,7 @@ OpenDDS目前不支持在創建數據寫入器之後修改`transport_priority`�
 
 ## 3.2.15 LATENCY\_BUDGET
 
-`LATENCY_BUDGET`策略通過其各自的QoS策略結構的`latency_budget`成員應用於主題，數據讀取器和數據寫入器實體。 以下是與`LatencyBudget `QoS策略相關的IDL：
+`LATENCY_BUDGET`策略通過其各自的QoS策略結構的`latency_budget`成員應用於主題，數據讀取器和數據寫入器實體。 以下是與`LatencyBudget`QoS策略相關的IDL：
 
 ```cpp
 struct LatencyBudgetQosPolicy {
@@ -502,6 +502,60 @@ OpenDDS還通過數據讀取器的擴展接口使摘要延遲統計信息可用�
   std::cout << " variance = " << stats[i].variance << std::endl;
  }
 ```
+
+## 3.2.16 ENTITY\_FACTORY
+
+`ENTITY_FACTORY`策略控制實體在創建時是否自動啟用。 以下是與實體工廠QoS策略相關的IDL：
+
+```cpp
+struct EntityFactoryQosPolicy {
+ boolean autoenable_created_entities;
+};
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
