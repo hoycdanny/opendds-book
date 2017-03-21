@@ -519,3 +519,153 @@ struct EntityFactoryQosPolicy {
 
 此政策的值可能隨時更改。對此策略的更改僅影響更改後創建的實體。
 
+## 3.2.17PRESENTATION 
+
+`PRESENTATION `QoS策略控制發布者對實例的更改如何呈現給數據讀取器。 它影響這些更改的相對順序和此順序的範圍。 此外，該策略引入了相干改變集的概念。 這裡是演示QoS的IDL：
+
+```cpp
+enum PresentationQosPolicyAccessScopeKind {
+ INSTANCE_PRESENTATION_QOS,
+ TOPIC_PRESENTATION_QOS,
+ GROUP_PRESENTATION_QOS
+};
+struct PresentationQosPolicy {
+ PresentationQosPolicyAccessScopeKind access_scope;
+ boolean coherent_access;
+ boolean ordered_access;
+};
+```
+
+這些更改的範圍（access\_scope）指定應用程序可能的級別
+
+注意：
+
+- `INSTANCE_PRESENTATION_QOS`（默認值）表示獨立對實例進行更改。實例訪問基本上作為針對`coherent_access`和`ordered_access`的無操作。將這些值之一設置為true在訂閱應用程序中沒有可觀察到的影響。
+
+- `TOPIC_PRESENTATION_QOS`表示接受的更改僅限於同一數據讀取器或數據寫入器中的所有實例。
+
+- `GROUP_PRESENTATION_QOS`表示接受的更改僅限於同一發布商或訂閱者中的所有實例。
+
+相干改變（`coherent_access`）允許實例的一個或多個改變作為單個改變對相關聯的數據讀取器可用。如果數據讀取器未接收到發布者做出的整組一致的改變，則沒有任何改變可用。連貫變化的語義在本質上與許多關係數據庫提供的事務中的語義相似。默認情況下，`coherent_access`為`false`。
+
+還可以按照由發布者發送的順序（`ordered_access`）向相關聯的數據讀取器提供改變。這在性質上類似於`DESTINATION_ORDER `QoS策略，然而`ordered_access`允許獨立於實例排序來對數據進行排序。默認情況下，`ordered_access`為`false`。
+
+**注意:**該策略控制對訂戶可用的樣本的排序和範圍，但是訂戶應用必須在讀取樣本時使用適當的邏輯以保證所請求的行為。 有關更多詳細信息，請參閱版本1.4 DDS規範的第2.2.2.5.1.9節。
+
+## 3.2.18 DESTINATION\_ORDER
+
+`DESTINATION_ORDER `QoS策略控制給定實例中的樣本對數據讀取器可用的順序。 如果指定歷史深度為1（默認值），則實例將反映所有數據寫入程序寫入該實例的最新值。 以下是目標訂單的IDL：
+
+```cpp
+enum DestinationOrderQosPolicyKind {
+ BY_RECEPTION_TIMESTAMP_DESTINATIONORDER_QOS,
+ BY_SOURCE_TIMESTAMP_DESTINATIONORDER_QOS
+};
+struct DestinationOrderQosPolicy {
+ DestinationOrderQosPolicyKind kind;
+};
+```
+
+`BY_RECEPTION_TIMESTAMP_DESTINATIONORDER_QOS`值（缺省值）表示實例中的樣本按數據讀取器接收它們的順序排序。 注意，樣本不一定按照由相同數據寫入器發送的順序接收。 要強制執行此類型的排序，應使用`BY_SOURCE_TIMESTAMP_DESTINATIONORDER_QOS`值。
+
+`BY_SOURCE_TIMESTAMP_DESTINATIONORDER_QOS`值指示實例內的樣本基於數據寫入程序提供的時間戳進行排序。 應注意，如果多個數據寫入器寫入同一實例，則應注意確保時鐘同步以防止數據讀取器上的不正確排序。
+
+## 3.2.19 WRITER\_DATA\_LIFECYCLE
+
+`WRITER_DATA_LIFECYCLE `QoS策略控制數據寫入器管理的數據實例的生命週期。 以下是Writer數據生命週期QoS策略的IDL：
+
+```cpp
+struct WriterDataLifecycleQosPolicy {
+ boolean autodispose_unregistered_instances;
+};
+```
+
+當`autodispose_unregistered_instances`設置為`true`（默認值）時，數據寫入程序
+
+處理未註冊的實例。 在一些情況下，可能期望防止在實例未註冊時實例被佈置。 例如，該策略可以允許`EXCLUSIVE`數據寫入器正常地推遲到下一個數據寫入器，而不影響實例狀態。 刪除數據寫入程序會在刪除之前隱式地註銷其所有實例。
+
+## 3.2.20 READER\_DATA\_LIFECYCLE
+
+`READER_DATA_LIFECYCLE `QoS策略控制由數據讀取器管理的數據實例的生命週期。 以下是`Reader Data Lifecycle` QoS策略的IDL：
+
+```cpp
+struct ReaderDataLifecycleQosPolicy {
+ Duration_t autopurge_nowriter_samples_delay;
+ Duration_t autopurge_disposed_samples_delay;
+};
+```
+
+通常，數據讀取器維護所有實例的數據，直到沒有更多的實例的關聯數據寫入器，實例已經被丟棄或者數據已經被用戶採用。
+
+在某些情況下，可能需要限制這些資源的回收。 該策略可以例如允許晚加入數據寫入器延長故障切換情況下的實例的生存期。
+
+`autopurge_nowriter_samples_delay`控制在實例過渡到`NOT_ALIVE_NO_WRITERS`狀態後，數據讀取器在回收資源之前等待的時間。 默認情況下，`autopurge_nowriter_samples_delay`是無限的。
+
+`autopurge_disposed_samples_delay`控制一旦實例轉換為`NOT_ALIVE_DISPOSED`狀態，數據讀取器在回收資源之前等待的時間。 默認情況下，`autopurge_disposed_samples_delay`是無限的。
+
+## 3.2.21 TIME\_BASED\_FILTER
+
+`TIME_BASED_FILTER `QoS策略控制數據讀取器對數據實例的值更改感興趣的頻率。 這裡是基於時間的過濾器的IDL QoS：
+
+```cpp
+struct TimeBasedFilterQosPolicy {
+ Duration_t minimum_separation;
+};
+```
+
+可以在數據讀取器上指定間隔（`minimum_separation`）。 該間隔定義了實例值更改之間的最小延遲; 這允許數據讀取器節制變化而不影響相關聯的數據寫入器的狀態。 默認情況下，`minimum_separation`為零，表示沒有數據被過濾。 此QoS策略不節省帶寬，因為實例值更改仍然發送到訂戶進程。 它只影響通過數據讀取器提供的樣品。
+
+## 3.2.22OWNERSHIP
+
+`OWNERSHIP`策略控制是否有多個數據寫入器能夠為同一數據對象實例寫入樣本。 所有權可以是獨家或共享。 下面是與所有權QoS策略相關的IDL：
+
+```cpp
+enum OwnershipQosPolicyKind {
+ SHARED_OWNERSHIP_QOS,
+ EXCLUSIVE_OWNERSHIP_QOS
+};
+struct OwnershipQosPolicy {
+ OwnershipQosPolicyKind kind;
+};
+```
+
+如果類成員設置為`SHARED_OWNERSHIP_QOS`，則允許多個數據寫入器更新相同的數據對象實例。 如果類成員設置為`EXCLUSIVE_OWNERSHIP_QOS`，則僅允許一個數據寫入器更新給定的數據對象實例（即，數據寫入器被認為是實例的所有者），並且相關聯的數據讀取器將僅看到由該寫入器寫入的樣本 數據寫入器。 實例的所有者由`OWNERSHIP_STRENGTH`策略的值確定; 具有最大強度值的數據寫入器被認為是數據對象實例的所有者。 其他因素也可能影響所有權，例如具有最高強度的數據作者是否“活著”（如`LIVELINESS`策略所定義），並且沒有違反其提供的發布期限約束（由`DEADLINE`政策定義）。
+
+3.2.23 OWNERSHIP\_STRENGTH
+
+當OWNERSHIP類型設置為EXCLUSIVE時，OWNERSHIP\_STRENGTH策略與OWNERSHIP策略結合使用。 以下是與所有權強度QoS策略相關的IDL：
+
+```
+struct OwnershipStrengthQosPolicy {
+ long value;
+};
+```
+
+值成員用於確定哪個數據作者是數據對象實例的所有者。 默認值為零。
+
+# 3.3 Policy Example
+
+以下示例代碼說明了為發布商設置和應用的一些策略。
+
+```cpp
+DDS::DataWriterQos dw_qos;
+ pub->get_default_datawriter_qos (dw_qos);
+ dw_qos.history.kind = DDS::KEEP_ALL_HISTORY_QOS;
+ dw_qos.reliability.kind = DDS::RELIABLE_RELIABILITY_QOS;
+ dw_qos.reliability.max_blocking_time.sec = 10;
+ dw_qos.reliability.max_blocking_time.nanosec = 0;
+ dw_qos.resource_limits.max_samples_per_instance = 100;
+ DDS::DataWriter_var dw =
+ pub->create_datawriter(topic,dw_qos, 0, // No listenerOpenDDS::DCPS::DEFAULT_STATUS_MASK);
+```
+
+此代碼創建具有以下質量的發布商：
+
+•HISTORY設置為全部保留
+
+•可靠性設置為可靠，最大阻塞時間為10秒
+
+•每個實例資源限制的最大樣本設置為100
+
+這意味著，當100個樣本等待傳送時，寫入程序可以阻止長達10秒鐘，然後返回錯誤代碼。 在數據讀取器側的這些相同的QoS設置意味著在任何被拒絕之前，框架排隊多達100個未讀樣本。 刪除被拒絕的樣本，並更新`SampleRejectedStatus`。
+
