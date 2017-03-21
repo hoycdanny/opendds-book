@@ -88,29 +88,29 @@ if (DDS::RETCODE_OK != ret) {
 #### 表3-2為預設主題QoS策略
 
 | Policy | Member | Default Value |
-| :--- | :--- | :--- |
+| :---: | :---: | :---: |
 | TOPIC\_DATA | value | \(empty sequence\) |
-| DURABILITY | kind、service\_cleanup\_delay.sec、service\_cleanup\_delay.nanosec | VOLATILE\_DURABILITY\_QOS、DURATION\_ZERO\_SEC、DURATION\_ZERO\_NSEC |
-| DURABILITY\_SERVICE | service\_cleanup\_delay.sec、service\_cleanup\_delay.nanosec、history\_kind、history\_depth、max\_samples、max\_instances、max\_samples\_per\_instance | DURATION\_ZERO\_SEC、DURATION\_ZERO\_NSEC、KEEP\_LAST\_HISTORY\_QOS、1、LENGTH\_UNLIMITED、LENGTH\_UNLIMITED、LENGTH\_UNLIMITED |
-| DEADLINE  | period.sec、period.nanosec | DURATION\_INFINITY\_SEC、DURATION\_INFINITY\_NSEC |
+| DURABILITY | kind                                                          service\_cleanup\_delay.sec                   service\_cleanup\_delay.nanosec | VOLATILE\_DURABILITY\_QOS                DURATION\_ZERO\_SEC                          DURATION\_ZERO\_NSEC |
+| DURABILITY\_SERVICE | service\_cleanup\_delay.sec                    service\_cleanup\_delay.nanosec          history\_kind                                            history\_depth                                        max\_samples                                       max\_instances                                     max\_samples\_per\_instance | DURATION\_ZERO\_SEC                           DURATION\_ZERO\_NSEC                       KEEP\_LAST\_HISTORY\_QOS                 1                                                              LENGTH\_UNLIMITED                            LENGTH\_UNLIMITED                            LENGTH\_UNLIMITED |
+| DEADLINE | period.sec、period.nanosec | DURATION\_INFINITY\_SEC、DURATION\_INFINITY\_NSEC |
 | LATENCY\_BUDGET | duration.sec、duration.nanosec | DURATION\_ZERO\_SEC、DURATION\_ZERO\_NSEC |
 | LIVELINESS | kind、lease\_duration.sec、lease\_duration.nanosec | AUTOMATIC\_LIVELINESS\_QOS、DURATION\_INFINITY\_SEC、DURATION\_INFINITY\_NSEC |
 
-#####  Quality of Service
+##### Quality of Service
 
 | Policy | Member | Default Value |
-| :--- | :--- | :--- |
-| RELIABILITY | kind、max\_blocking\_time.sec、max\_blocking\_time.nanosec | BEST\_EFFORT\_RELIABILITY\_QOS、DURATION\_INFINITY\_SEC、DURATION\_INFINITY\_NSEC |
-| DESTINATION\_ORDER | kind  | BY\_RECEPTION\_TIMESTAMP\_、DESTINATIONORDER\_QOS |
-| HISTORY  | kind、depth | KEEP\_LAST\_HISTORY\_QOS、1 |
-| RESOURCE\_LIMITS | max\_samples、max\_instances、max\_samples\_per\_instance | LENGTH\_UNLIMITED、LENGTH\_UNLIMITED、LENGTH\_UNLIMITED |
+| :---: | :---: | :---: |
+| RELIABILITY |  kind                                                         max\_blocking\_time.sec                       max\_blocking\_time.nanosec | BEST\_EFFORT\_RELIABILITY\_QOS        DURATION\_INFINITY\_SEC                    DURATION\_INFINITY\_NSEC |
+| DESTINATION\_ORDER | kind | BY\_RECEPTION\_TIMESTAMP\_             DESTINATIONORDER\_QOS |
+| HISTORY | kind、depth | KEEP\_LAST\_HISTORY\_QOS                  1 |
+| RESOURCE\_LIMITS | max\_samples                                        max\_instances                                     max\_samples\_per\_instance | LENGTH\_UNLIMITED                              LENGTH\_UNLIMITED                            LENGTH\_UNLIMITED |
 | TRANSPORT\_PRIORITY | value | 0 |
-| LIFESPAN | duration.sec、duration.nanosec | DURATION\_INFINITY\_SEC、DURATION\_INFINITY\_NSEC |
+| LIFESPAN | duration.sec                                            duration.nanosec | DURATION\_INFINITY\_SEC                         DURATION\_INFINITY\_NSEC |
 | OWNERSHIP | kind | SHARED\_OWNERSHIP\_QOS |
 
 #### 表3-3為預設發布服務器QoS策略
 
-| Policy | Member  | Default Value |
+| Policy | Member | Default Value |
 | :--- | :--- | :--- |
 | PRESENTATION |  |  |
 |  |  |  |
