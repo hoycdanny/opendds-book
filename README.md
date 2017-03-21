@@ -159,13 +159,13 @@ OpenDDS實現符合OMG DDSI-RTPS規範的要求。
 
 ## 1.2.3 OpenDDS架構
 
-本節簡要概述了OpenDDS實現，其特性及其一些組件。 $ DDS\_ROOT環境變量應指向OpenDDS發行版的基本目錄。 OpenDDS的源代碼可以在$ DDS\_ROOT / dds /目錄下找到。 DDS測試可以在$ DDS\_ROOT / tests /下找到。
+本節簡要概述了OpenDDS實現，其特性及其一些組件。$DDS_ROOT 環境變量應指向 OpenDDS 的基本目錄。 OpenDDS的源代碼可以在 $DDS_ROOT/dds/ 目錄下找到。 DDS測試可以在 $DDS_ROOT/tests/下找到。
 
 ### 1.2.3.1 設計哲學
 
-OpenDDS實現和API基於對OMG IDL PSM的相當嚴格的解釋。在幾乎所有情況下，OMG的CORBA IDL的C ++語言映射用於定義DDS規範中的IDL如何映射到OpenDDS向客戶端公開的C ++ API。
+OpenDDS 實現和 API 基於對 OMG IDL PSM 的相當嚴格的解釋。幾乎在所有情況下，OMG 的 CORBA IDL 的 C++ 語言映射用於定義 DDS 規範中的 IDL 如何映射到 OpenDDS 向客戶端提供的 C++ API。
 
-與OMG IDL PSM的主要偏離在於本地接口用於實體和各種其他接口。這些在DDS規範中定義為非約束（非本地）接口。將它們定義為本地接口可以提高性能，減少內存使用，簡化客戶端與這些接口的交互，並使客戶端更容易構建自己的實現。
+與 OMG IDL PSM 的主要偏離在於本地接口用於實體和各種其他接口。這些在 DDS 規範中定義為非約束（非本地）接口。將它們定義為本地接口可以提高性能，減少內存使用，簡化客戶端與這些接口的交互，並使客戶端更容易構建自己的實現。
 
 ### 1.2.3.2 可擴展傳輸框架（ETF）
 
