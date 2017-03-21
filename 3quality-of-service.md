@@ -1,4 +1,4 @@
-# CHAPTER 3
+* [ ] # CHAPTER 3
 
 ### Quality of Service
 
@@ -27,7 +27,7 @@ module DDS {
 
 應用程序可以通過對實體調用set\_qos（）操作來更改任何實體的QoS。 如果QoS是可改變的，則如果現有關聯不再兼容，則去除它們，並且如果它們變得兼容，則添加新關聯。 DCPSInfoRepo根據QoS規範重新評估QoS兼容性和關聯。 如果兼容性檢查失敗，則調用set\_qos（）將返回錯誤。 協會重新評估可能導致刪除現有的關聯或添加新的關聯。
 
-如果用戶嘗試更改不可變（不可更改）的QoS策略，則 `set_qos() ` returns  `DDS::RETCODE_IMMUTABLE_POLICY`.
+如果用戶嘗試更改不可變（不可更改）的QoS策略，則 `set_qos()` returns  `DDS::RETCODE_IMMUTABLE_POLICY`.
 
 QoS策略的子集是可改變的。 一些可改變的QoS策略**（例如USER\_DATA，TOPIC\_DATA，GROUP\_DATA，LIFESPAN，OWNERSHIP\_STRENGTH，TIME\_BASED\_FILTER，ENTITY\_FACTORY，WRITER\_DATA\_LIFECYCLE和READER\_DATA\_LIFECYCLE）**不需要兼容性和關聯重新評估。 **DEADLINE**和**LATENCY\_BUDGET** QoS策略要求兼容性重新評估，但不要求關聯。 **PARTITION QoS**策略不需要兼容性重新評估，但需要關聯重新評估。
 
@@ -80,25 +80,46 @@ if (DDS::RETCODE_OK != ret) {
 
 #### 表3-1為預設的DomainParticipant QoS策略
 
-| Policy  | Member | Default Value |
+| Policy | Member | Default Value |
 | :--- | :--- | :--- |
 | USER\_DATA | value | \(empty sequence\) |
-| ENTITY\_FACTORY  | autoenable\_created\_entities | true |
+| ENTITY\_FACTORY | autoenable\_created\_entities | true |
 
 #### 表3-2為預設主題QoS策略
 
 | Policy | Member | Default Value |
 | :--- | :--- | :--- |
-| TOPIC\_DATA  | value | \(empty sequence\) |
+| TOPIC\_DATA | value | \(empty sequence\) |
 | DURABILITY | kind、service\_cleanup\_delay.sec、service\_cleanup\_delay.nanosec | VOLATILE\_DURABILITY\_QOS、DURATION\_ZERO\_SEC、DURATION\_ZERO\_NSEC |
-| DURABILITY\_SERVICE |  |  |
+| DURABILITY\_SERVICE | service\_cleanup\_delay.sec、service\_cleanup\_delay.nanosec、history\_kind、history\_depth、max\_samples、max\_instances、max\_samples\_per\_instance | DURATION\_ZERO\_SEC、DURATION\_ZERO\_NSEC、KEEP\_LAST\_HISTORY\_QOS、1、LENGTH\_UNLIMITED、LENGTH\_UNLIMITED、LENGTH\_UNLIMITED |
+| DEADLINE  | period.sec、period.nanosec | DURATION\_INFINITY\_SEC、DURATION\_INFINITY\_NSEC |
+| LATENCY\_BUDGET | duration.sec、duration.nanosec | DURATION\_ZERO\_SEC、DURATION\_ZERO\_NSEC |
+| LIVELINESS | kind、lease\_duration.sec、lease\_duration.nanosec | AUTOMATIC\_LIVELINESS\_QOS、DURATION\_INFINITY\_SEC、DURATION\_INFINITY\_NSEC |
+
+#####  Quality of Service
+
+| Policy | Member | Default Value |
+| :--- | :--- | :--- |
+| RELIABILITY | kind、max\_blocking\_time.sec、max\_blocking\_time.nanosec | BEST\_EFFORT\_RELIABILITY\_QOS、DURATION\_INFINITY\_SEC、DURATION\_INFINITY\_NSEC |
+| DESTINATION\_ORDER | kind  | BY\_RECEPTION\_TIMESTAMP\_、DESTINATIONORDER\_QOS |
+| HISTORY  | kind、depth | KEEP\_LAST\_HISTORY\_QOS、1 |
+| RESOURCE\_LIMITS | max\_samples、max\_instances、max\_samples\_per\_instance | LENGTH\_UNLIMITED、LENGTH\_UNLIMITED、LENGTH\_UNLIMITED |
+| TRANSPORT\_PRIORITY | value | 0 |
+| LIFESPAN | duration.sec、duration.nanosec | DURATION\_INFINITY\_SEC、DURATION\_INFINITY\_NSEC |
+| OWNERSHIP | kind | SHARED\_OWNERSHIP\_QOS |
+
+#### 表3-3為預設發布服務器QoS策略
+
+| Policy | Member  | Default Value |
+| :--- | :--- | :--- |
+| PRESENTATION |  |  |
 |  |  |  |
 |  |  |  |
 |  |  |  |
-|  |  |  |
-|  |  |  |
-|  |  |  |
-|  |  |  |
+
+#### 表3-4為預設用戶QoS策略
+
+#### 表3-5為預設DataWriter QoS策略
 
 
 
