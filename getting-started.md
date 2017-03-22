@@ -68,7 +68,7 @@ project(*idl): dcps {
 }
 ```
 
-dcps父項目添加了類型支持自定義構建規則。 上面的TypeSupport\_Files部分告訴MPC使用OpenDDS IDL編譯器從Messenger.idl生成消息類型支持文件。 這是發布商部分：
+dcps 父項目添加了類型支援自定義構建規則。上面的 TypeSupport_Files 部分告訴MPC使用 OpenDDS IDL 編譯器從 Messenger.idl 生成訊息類型支援文件。 這是 publisher  部分：
 
 ```cpp
 project(*Publisher): dcpsexe_with_tcp {
@@ -83,9 +83,9 @@ project(*Publisher): dcpsexe_with_tcp {
 }
 ```
 
-dcpsexe\_with\_tcp項目鏈接在DCPS庫中。
+dcpsexe_with_tcp 項目鏈接在DCPS庫中。
 
-為了完整性，這裡是MPC文件的訂戶部分：
+為了完整性，這裡是MPC文件的 subscriber  部分：
 
 ```cpp
 project(*Subscriber): dcpsexe_with_tcp {
@@ -101,16 +101,15 @@ Source_Files {
 }
 ```
 
-## 2.1.3簡單消息發佈器
+## 2.1.3簡單消息 Publisher
 
-在本節中，我們將介紹設置一個簡單的OpenDDS發布過程所涉及的步驟。 代碼被分成邏輯部分，並解釋為我們呈現每個部分。
+在本節中，我們將介紹設置一個簡單的 OpenDDS 推撥程序所涉及的步驟。代碼被分成邏輯部分，並解釋為我們呈現每個部分。
 
-我們省略了代碼中一些不感興趣的部分（例如\#include指令，錯誤處理和跨進程同步）。 此示例發布者的完整源代碼位於$ DDS\_ROOT / DevGuideExamples / DCPS / Messenger /中的_Publisher.cpp和Writer.cpp文件_中。
+我們省略了代碼中一些不感興趣的部分（例如 #include指令，錯誤處理和跨進程同步）。 此示例發布者的完整源代碼位於 $DDS/ROOT/DevGuideExamples/DCPS/Messenger/ 中的 Publisher.cpp 和 Writer.cpp 文件中。
 
 ### 2.1.3.1初始化參與者
 
-`main（）`的第一部分將當前進程初始化為OpenDDS參與者。
-
+`main()`的第一部分將當前進程初始化為 OpenDDS 參與者。
 ```
 int main (int argc, char *argv[]) {
  try {
@@ -127,19 +126,16 @@ int main (int argc, char *argv[]) {
   }
 ```
 
-`TheParticipantFactoryWithArgs` macro在`Service_Participant.h`中定義，並使用命令行參數初始化域參與者工廠。 這些命令行參數用於初始化OpenDDS服務使用的ORB以及服務本身。 這允許我們在命令行上傳遞`ORB_init（）`選項，以及-DCPS \*格式的OpenDDS配置選項。 可用的OpenDDS選項在第7章中有詳細描述。
+`TheParticipantFactoryWithArgs` 巨集 `Service_Participant.h` 中定義，並以命令列參數來初始化  Domain Participant Factory。這些命令參數用於初始化 ORB 也就是 OpenDDS 服務本身。這也允許我們略過 ORB_init()選項以及 OpenDDS 的 DCPS* 選項設定。可用的OpenDDS選項在第7章中有詳細描述。
 
-`create_participant（）`操作使用域參與者工廠將此進程註冊為由ID 42指定的域中的參與者。參與者使用默認QoS策略和沒有偵聽器。 OpenDDS默認狀態掩碼的使用確保中間件中的所有相關通信狀態改變（例如，可用的數據，活力丟失）被傳送到應用程序（例如，通過收聽者上的回調）。
+`create_participant()` 使用domain 參與工廠註冊 ID 42 的 domain。參與者使用默認的 QOS 而且沒有監聽者。使用 OpenSSD 默認狀態遮罩確保所有相關的溝通狀態改變(像是 資料可用性、liveliness lost)中介層可以和應用層溝通(像是 通過監聽者回傳)。
 
-用戶可以使用範圍（0x0〜0x7FFFFFFF）中的ID定義任意數量的域。 所有其他值保留供實施內部使用。
+可以定義 doamin ID 範圍(0x00000000 ~ 0x7FFFFFFF)。其他保留值為內部使用。
+Domain Participant 物件引用我們註冊的訊息資料型態。
 
-返回的域參與者對象引用然後用於註冊我們的消息數據類型。
+### 2.1.3.2註冊數據類型和創建 Topic
 
-### 2.1.3.2註冊數據類型和創建主題
-
-首先，我們創建一個MessageTypeSupportImpl對象，然後註冊一個類型的類型
-
-名稱使用`register_type（）`操作。 在此示例中，我們使用nil字符串類型名稱註冊該類型，這將使MessageTypeSupport接口存儲庫標識符用作類型名稱。 也可以使用諸如“消息”的特定類型名稱。
+首先，我們創建一個 MessageTypeSupportImpl 的物件並用註冊 register_type() 。在此範例中註冊一個空字串的型態，這會使 MessageTypeSupportImpl 為接口辨識名稱。也可以使用"Message" 為該特定辨識名稱。
 
 ```cpp
  Messenger::MessageTypeSupport_var mts =
@@ -150,7 +146,7 @@ int main (int argc, char *argv[]) {
  }
 ```
 
-接下來，我們從類型支持對象獲取註冊的類型名稱，並通過將類型名稱傳遞給`create_topic（）`操作中的參與者來創建主題。
+接下來，我們註冊該類型名稱並且創建 topic 藉由使用 create_topic()。
 
 ```cpp
 CORBA::String_var type_name = mts->get_type_name ();
@@ -166,7 +162,7 @@ CORBA::String_var type_name = mts->get_type_name ();
  }
 ```
 
-我們已經創建了一個名為“電影討論列表”的主題，註冊類型和默認QoS策略。
+我們已經創建好一個為 "Movie Discussion List" 的 topic 名稱並使用預設的 QOS。
 
 ### 2.1.3.3創建發布服務器
 
