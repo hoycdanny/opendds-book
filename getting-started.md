@@ -4,13 +4,11 @@
 
 ## 2.1使用DCPS
 
-本章重點介紹使用DCPS將數據從單個發布者進程分發到單個訂戶進程的示例應用程序。 它基於一個簡單的信使應用程序，其中單個發布者發布消息，並且單個訂閱者訂閱它們。 我們使用默認的QoS屬性和默認的TCP / IP傳輸。 此示例的完整源代碼可以在
-
-$ DDS\_ROOT / DevGuideExamples / DCPS / Messenger /目錄。 其他DDS和DCPS功能將在後面的章節中討論。
+本章重點介紹使用 DCPS 將數據從單個 publisher 進程分發到單個 subscriber 進程的示例應用程序。它基於一個簡單的信訊息應用程序，其中單個 publisher 發布消息，並且單個 subscriber 訂閱它們。我們使用默認的 QoS 屬性和默認的 TCP/IP 傳輸。此示例的完整源代碼可以在 $DDSR/OOT/DevGuideExamples/DCPS/Messenger/ 目錄。其他 DDS 和 DCPS 功能將在後面的章節中討論。
 
 ## 2.1.1定義數據類型
 
-DDS使用的每種數據類型都是使用IDL定義的。 OpenDDS使用\#pragma指令來標識DDS傳輸和處理的數據類型。 這些數據類型由TAO IDL編譯器和OpenDDS IDL編譯器處理，以生成必要的代碼，以使用OpenDDS傳輸這些類型的數據。 這裡是定義我們的消息數據類型的IDL文件：
+DDS 使用的每種數據類型都是使用 IDL 定義的。OpenDDS使用 #pragma 指令來標識 DDS 傳輸和處理的數據類型。這些數據類型由 TAO IDL 編譯器和 OpenDDS IDL 編譯器處理，以生成必要的代碼，以使用 OpenDDS 傳輸這些類型的數據。這裡是定義我們的消息數據類型的IDL文件：
 
 ```cpp
 module Messenger {
@@ -26,35 +24,39 @@ struct Message {
 };
 ```
 
-DCPS\_DATA\_TYPE pragma標記用於OpenDDS的數據類型。必須在此pragma偽指令中使用完全作用域類型名稱。 OpenDDS要求數據類型是一個結構。
+DCPS_DATA_TYPE pragma 標記用於 OpenDDS 的數據類型。全範圍型必須配合 pragma 使用。OpenDDS 要求數據類型是一個結構。該結構可以包含純量類型（short, long, float,等）enumerations, strings,sequences, arrays, structures,和 unions。此 Opendds 範例定義了 structure Messenger 在  Messenger module 之中。
 
-該結構可以包含標量類型（短，長，浮動等），枚舉，字符串，序列，數組，結構和聯合。此示例定義了Messenger模塊中用於此OpenDDS示例的結構Message。
-
-DCPS\_DATA\_KEY pragma標識用作此類型的鍵的DCPS數據類型的字段。數據類型可以有零個或多個鍵。這些鍵用於標識主題內的不同實例。每個鍵應該是數字或枚舉類型，字符串或這些類型之一的typedef.1 pragma傳遞完全範圍類型和標識該類型的鍵的成員名。使用單獨的DCPS\_DATA\_KEY編譯指示指定多個鍵。在上面的示例中，我們將Messenger :: Message的subject\_id成員標識為鍵。以唯一subject\_id值發布的每個示例將被定義為屬於同一主題中的不同實例。由於我們使用默認QoS策略，具有相同subject\_id值的後續樣本將被視為該實例的替換值。
-
+DCPS_DATA_KEY pragma 為 DCPS 的一個辨識片斷像是這個型態的 key 。數據類型可以有零個或多個 key 。這些 key 用來分辨不同的實例在 topic 中 。
+每個 key 應該是數字或 enumerated 的型態，字串, 或這些型態的其中一種(註1)。
+pragma 通過完全範圍類型和會員名稱型態的識別 key 。複數的 key 是被單獨指定 DCPS_DATA_KEY pragmas。在範例中，我們將 Messenger::Message 當作 subject_id 的辨識。每個範例推送都有獨特的 subject_id 值在同一 topic 下來辨認屬於哪個實例。
+在使用默認的 QOS 下，具有相同 subject_id 的值會被後續相同的 subject_id 的值替換掉。
+註1.其他類型（例如structures, sequences, 和 arrays）不能直接當做 key，但是當這些members/elements是numeric, enumerated, string 類型時，structs or elements of arrays 的單個成員可以用作 key。
 ## 2.1.2處理IDL
 
-OpenDDS IDL首先由TAO IDL編譯器處理。
+OpenDDS IDL 首先由 TAO IDL編 譯器處理。
 
 `tao_idl Messenger.idl`
 
-此外，我們需要使用OpenDDS IDL編譯器處理IDL文件，以生成OpenDDS需要編譯和解密消息的序列化和密鑰支持代碼，以及數據讀取器和寫入器的類型支持代碼。 此IDL編譯器位於$ DDS\_ROOT / bin /中，並為每個處理的IDL文件生成三個文件。 這三個文件都以原始IDL文件名開頭，顯示如下：
+此外，我們需要使用OpenDDS IDL編譯器處理IDL文件，以生成OpenDDS需要編譯和解密消息的序列化和密鑰支持代碼，以及 data reader 和 data writer 支援的類型代碼。此 IDL 編譯器位於 $DDS/ROOT/bin/ 中，並為每個處理的 IDL 文件生成三個文件。這三個文件都以原始IDL文件名開頭，顯示如下：
 
-•&lt;filename&gt; TypeSupport.idl
+•<ilename>TypeSupport.idl
 
-1.其他類型（例如結構，序列和數組）不能直接用作鍵，但是當這些成員/元素是數字，枚舉或字符串類型時，結構體或數組元素的單個成員可以用作鍵。
 
-• &lt;filename&gt;TypeSupportImpl.h
 
-• &lt;filename&gt;TypeSupportImpl.cpp
+• <filename>TypeSupportImpl.h
 
-例如，運行opendds\_idl如下
+• <filename>TypeSupportImpl.cpp
 
-`opendds_idl Messenger.idl`
+例如，運行opendds_idl如下
 
-生成MessengerTypeSupport.idl，MessengerTypeSupportImpl.h和MessengerTypeSupportImpl.cpp。 IDL文件包含MessageTypeSupport，MessageDataWriter和MessageDataReader接口定義。這些是類型特定的DDS接口，我們稍後使用它們向域註冊我們的數據類型，發布該數據類型的樣本，並接收已發布的樣本。實現文件包含這些接口的實現。生成的IDL文件本身應該使用TAO IDL編譯器來編譯，以生成存根和骨架。這些和實現文件應該與使用消息類型的OpenDDS應用程序鏈接。 OpenDDS IDL編譯器有許多選項專門生成生成的代碼。這些選項在第8章中描述。
+opendds_idl Messenger.idl
 
-通常，您不直接調用上面的TAO或OpenDDS IDL編譯器，但讓您的構建環境為您做。通過從dcpsexe\_with\_tcp項目繼承，使用MPC時，簡化了整個過程。這是發布者和訂閱者共同的MPC文件部分
+生成 MessengerTypeSupport.idl，MessengerTypeSupportImpl.h和MessengerTypeSupportImpl.cpp。IDL文件包含 MessageTypeSupport，MessageDataWriter 和 MessageDataReader 接口定義。這些是類型特定的DDS接口，
+稍候我們會使用這些特別的型態註冊 domain ,推播範例的資料類型,接收推送範例。實現文件包含這些接口的實現。生成的 IDL 文件本身應該使用 TAO IDL 編譯器來編譯，以生成 stubs 和 skeletons. 。這些和實現文件應該與使用消息類型的 OpenDDS 應用程序鏈接。OpenDDS IDL編譯器有許多選項專門生成生成的代碼。這些選項在第8章中描述。
+
+通常，您不直接調用 TAO 或 OpenDDS IDL 編譯器，但讓您的構建環境為您做。
+使用 MPC 簡化整個程序藉由繼承 dcpsexe_with_tcp 專案。
+這是 publisher 和 subscriber 共同的 MPC 文件部分
 
 ```cpp
 project(*idl): dcps {
@@ -589,7 +591,8 @@ Messenger::Message message;
   message_writer->register_instance(message);
 ```
 
-在填充消息結構之後，我們調用`register_instance()`函數註冊實例。 實例由subject\_id值99標識（因為我們之前將該字段指定為鍵）。我們稍後可以在發布樣本時使用返回的實例句柄：
+在填充消息結構之後，我們調用`register_instance()`函數註冊實例。 實例由subject\_id值99標識（因為我們之前將該字段指定為鍵）。
+我們稍後可以在發布樣本時使用返回的實例句柄：
 
 ```cpp
 DDS::ReturnCode_t ret = data_writer->write(message, handle);
