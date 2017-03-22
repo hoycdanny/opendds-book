@@ -3,15 +3,15 @@
 ### **Introduction**
 
 
-OpenDDS是建立於 OMG Data Distribution Service (DDS) 的 Real-Time Systems V1.4(OMG 文件格式/2015-04-10) 和 Real-time Publish-Subscribe Wire Protocol DDS Interoperability Wire Protocol Specification(DDSI-RTPS) v2.2 (OMG Document formal/2014-09-01)。OpenDDS 是由 Object Computing, Inc. (OCI) 贊助。 Opendds 網址為[http://www.opendds.org/](http://opendds.org/)。開發人員指南基於 3.10 釋出版本的 Opendds。
+OpenDDS是建立於 OMG Data Distribution Service (DDS) 的 Real-Time Systems V1.4(OMG 文件格式/2015-04-10) 和 Real-time Publish-Subscribe Wire Protocol DDS Interoperability Wire Protocol Specification(DDSI-RTPS) v2.2 (OMG Document formal/2014-09-01)。OpenDDS 是由 Object Computing, Inc. (OCI) 贊助。 OpenDDS 網址為[http://www.OpenDDS.org/](http://OpenDDS.org/)。開發人員指南基於 3.10 釋出版本的 OpenDDS。
 
 DDS 的定義為在分散式的應用程式有效的傳輸分散式的應用程式資料。這個服務不特定為 CORBA 。提供 Platform Independent Model (PIM) 以及將 Platform Specific Model (PSM) 映射成 CORBA IDL。
 
 有關DDS的其他詳細信息，開發人員應參考DDS規範（OMG文件格式/ 2015-04-10），因為它包含對所有服務的功能的深入涵蓋。
 
-OpenDDS 是 C++ 所寫的開原軟體，OCI 提供 OMG's DDS 規範開發和商業支持。能夠從[http://www.opendds.org/downloads.html](http://www.opendds.org/downloads.html)下載和 OCI TAO version 2.0a and 2.2a 級別的補丁以及最新的文件。
+OpenDDS 是 C++ 所寫的開原軟體，OCI 提供 OMG's DDS 規範開發和商業支持。能夠從[http://www.OpenDDS.org/downloads.html](http://www.OpenDDS.org/downloads.html)下載和 OCI TAO version 2.0a and 2.2a 級別的補丁以及最新的文件。
 
-注意:OpenDDS目前實現OMG DDS 1.4版規範。 有關詳細訊息，請參閱[http://www.opendds.org/](http://www.opendds.org/)中的規格訊息。
+注意:OpenDDS目前實現OMG DDS 1.4版規範。 有關詳細訊息，請參閱[http://www.OpenDDS.org/](http://www.OpenDDS.org/)中的規格訊息。
 
 # 1.1. DCPS概述
 
@@ -25,25 +25,25 @@ OpenDDS 是 C++ 所寫的開原軟體，OCI 提供 OMG's DDS 規範開發和商�
 
 ### 1.1.1.1 Domain
 
-Domain 是 DCPS 中的基本分區單元。每個實體屬於一個domain，並且只能與該 domain 中的其他實體相互影響。
+Domain 是 DCPS 中的基本分區單元。每個實體屬於一個Domain，並且只能與該 Domain 中的其他實體相互影響。
 
-程式碼可以自由的與多個 domain 作用，但必需藉由分離不同 domain 的實體來做到。
+程式碼可以自由的與多個 Domain 作用，但必需藉由分離不同 Domain 的實體來做到。
 
 ### 1.1.1.2 DomainParticipant
 
-domain participant是應用程序與特定的 domain 互相作用的入口點。domain participant 是個工廠給許多物件參與讀取寫入的地方。
+Domain participant是應用程序與特定的 Domain 互相作用的入口點。Domain participant 是個工廠給許多物件參與讀取寫入的地方。
 
 ### 1.1.1.3 Topic
 
-在應用程序中 Topic 是publishing 和 subscribing 溝通的基本手段。每個 topiic 在 domain 中不能重複，以及發布它的特定數據類型。每個主題數據類型可以指定組零個或多個字段以及他的key(make up its key)。在發送資料時,發送程序總是會指定一個 topic 。Subscribers 通過 topic 請求數據。在DCPS術語中，你在 topic 推送個人不同的範例資料。每個實例都與唯一的 key 有關聯。推送過程中多個相同實例範本資料使用相同的key。
+在應用程序中 Topic 是Publishing 和 Subscribing 溝通的基本手段。每個 Topic 在 Domain 中不能重複，以及發布它的特定數據類型。每個主題數據類型可以指定組零個或多個字段以及他的key(make up its key)。在發送資料時,發送程序總是會指定一個 Topic 。Subscribers 通過 Topic 請求數據。在DCPS術語中，你在 Topic 推送個人不同的範例資料。每個實例都與唯一的 key 有關聯。推送過程中多個相同實例範本資料使用相同的key。
 
 ### 1.1.1.4 DataWriter
 
-推送應用程序碼使用 DataWriter 將值傳遞到DDS。每個 DataWriter 都綁定到一個特定的 Topic。應用程式使用特別的 DataWriter 介面來發送樣本到 topic。DataWriter 負責封裝資料並傳送。
+推送應用程序碼使用 DataWriter 將值傳遞到DDS。每個 DataWriter 都綁定到一個特定的 Topic。應用程式使用特別的 DataWriter 介面來發送樣本到 Topic。DataWriter 負責封裝資料並傳送。
 
 ### 1.1.1.5 Publisher
 
-Publisher 負責接收發送資料並傳給在同一 domain 底下有關的 Subscribe。精確的資訊實作是由服務來決定。
+Publisher 負責接收發送資料並傳給在同一 Domain 底下有關的 Subscribe。精確的資訊實作是由服務來決定。
 
 ### 1.1.1.6 Subscribe
 
@@ -51,17 +51,17 @@ Subscribe 接收從 Publisher 的資料並給相關的 DataReader。
 
 ### 1.1.1.7 DataReader
 
-DataReader 從 Subscribe 接收資料並轉換成對應 topic 的資料型態。每個 DataReader 綁定一個特定的 Topic。應用程式使用 DataReader 的特別的介面來接收樣本。
+DataReader 從 Subscribe 接收資料並轉換成對應 Topic 的資料型態。每個 DataReader 綁定一個特定的 Topic。應用程式使用 DataReader 的特別的介面來接收樣本。
 
 ## 1.1.2 Built-In Topics
 
-DDS中定義了數個 Topic。訂閱內建的 Topic 可以讓開發者存取 domain 的狀態包含，註冊的 Topic ,那些 DataReader DataWriter 是連接的還有不同接口的 QOS 設定。在訂閱時,應用程式會接收在 domain 改變的實體範例。
+DDS中定義了數個 Topic。訂閱內建的 Topic 可以讓開發者存取 Domain 的狀態包含，註冊的 Topic ,那些 DataReader DataWriter 是連接的還有不同接口的 QOS 設定。在訂閱時,應用程式會接收在 Domain 改變的實體範例。
 
 下表顯示了在DDS規範中定義的內置主題：
 
 | 主題名稱 | 描述 |
 | :--- | :--- |
-| DCPSParticipant | 每個實例的 domain participant |
+| DCPSParticipant | 每個實例的 Domain participant |
 | DCPSTopic Each | 每個實例表的一般（非內置）主題。 |
 | DCPSPublication | 每個實例的 DataWriter|
 | DCPSSubscription | 每個實例的 DataReader  |
@@ -69,7 +69,7 @@ DDS中定義了數個 Topic。訂閱內建的 Topic 可以讓開發者存取 dom
 ## 1.1.3 服務質量方針(QOS)
 
 DDS規範定義了許多服務質量（QoS）方針，應用程式使用指定的 QOS 需要的服務。 參與者指定他們從服務中需要什麼行為，服務決定如何實現這些行為。 這些這些
-這些 qos 可以給各種 DCPS 實例((topic, data writer, data reader, publisher, subscriber, domain participant) 然而不是所有的 qos 是對所有的實體是有效的。
+這些 qos 可以給各種 DCPS 實例((Topic, data writer, data reader, publisher, subscriber, Domain participant) 然而不是所有的 qos 是對所有的實體是有效的。
 
 Subscribers and publishers 使用 equest-versus-offered (RxO) model 來配對。
 訂閱者請求一組最低限度需要的qos。 發布者向潛在訂戶提供一組QoS。 DDS實現嘗試將所有的需求和提供的 qos 配對; 如果這些 qos 是兼容的，則形成關聯。
@@ -148,10 +148,10 @@ OpenDDS實現符合OMG DDSI-RTPS規範的要求。
 ## 1.2.2擴展到DDS規範
 
 •在 DDSIDL 模組e (C++ namespace, Java package)中資料型態，介面，常數直接對應 DDS 規範，有少數例外:
- 
-•DDS :: SampleInfo包含一個以“opendds_reserved”開頭的附加字段，
 
-•特定於類型的DataReaders（包括內置 topic 的DataReaders）具有其他操作read_instance_w_condition（）和take_instance_w_condition（）。額外的擴展行為由OpenDDS模塊/命名空間/包中的各種類和接口提供。 這些功能包括像是 Recorder和Replayer（見第12章）以及以下功能：
+•DDS :: SampleInfo包含一個以“OpenDDS_reserved”開頭的附加字段，
+
+•特定於類型的DataReaders（包括內置 Topic 的DataReaders）具有其他操作read_instance_w_condition（）和take_instance_w_condition（）。額外的擴展行為由OpenDDS模塊/命名空間/包中的各種類和接口提供。 這些功能包括像是 Recorder和Replayer（見第12章）以及以下功能：
 
 •OpenDDS::DCPS::TypeSupport 在DDS規範中未找到的unregister_type()。
 
@@ -189,13 +189,13 @@ OpenDDS 提供兩個發現選項。
 
 ### 使用DCPSInfoRepo進行集中式發現
 
-OpenDDS實現一個稱為DCPS的獨立訊息服務（DCPSInfoRepo）實現集中式發現方法。它被實現為 CORBA 服務器。當客戶端請求預訂 topic 時，DCPS 信息庫確認訂閱者的位置並通知給所有存在的通送者新的接收者的位置。在不是使用 RTPS 設定時 DCPSInfoRepo 將會啟用。RTPS 啟動時不會使用 DCPSInfoRepo 。DCPSInfoRepo不參與數據傳播，其作用只用於 OpenDDS 應用程式發現彼此。
+OpenDDS實現一個稱為DCPS的獨立訊息服務（DCPSInfoRepo）實現集中式發現方法。它被實現為 CORBA 服務器。當客戶端請求預訂 Topic 時，DCPS 信息庫確認訂閱者的位置並通知給所有存在的通送者新的接收者的位置。在不是使用 RTPS 設定時 DCPSInfoRepo 將會啟用。RTPS 啟動時不會使用 DCPSInfoRepo 。DCPSInfoRepo不參與數據傳播，其作用只用於 OpenDDS 應用程式發現彼此。
 
 ![](/1.3.jpg)
 
 應用程序開發人員可以自由運行多個信息庫，每個管理其自己的非重疊的DCPS域集合。
 
-還可以操作具有多於單個存儲庫的 domain ，從而形成分佈式虛擬存儲庫。這稱為存儲庫聯合。為了使各個存儲庫參與聯合，每個庫必須在啟動時指定其自己的聯合標識符值（一個32 bit的數）。有關存儲庫聯合的更多信息，請參見9.2。
+還可以操作具有多於單個存儲庫的 Domain ，從而形成分佈式虛擬存儲庫。這稱為存儲庫聯合。為了使各個存儲庫參與聯合，每個庫必須在啟動時指定其自己的聯合標識符值（一個32 bit的數）。有關存儲庫聯合的更多信息，請參見9.2。
 
 ### RTPS 的點對點發現
 
@@ -203,9 +203,9 @@ DDS 的點對點模式可相容於 OpenDDS 的模式。此方法可由當前版�
 每個參與形成都會啟動 DDSI—RTPS 資料讀寫的發現機制，預設或是設定的網路阜號這樣 DDS 參與者可以開始廣播它的資料讀取接收是可以使用的。一段時間後，基於標準找到彼此和討論設定基本連接設定插件在 Extensible Transport Framework (ETF)之中。這種靈活配置方法的更詳細描述在第7.4.1.1節和第7.4.5.5節中討論。
 
 以下是開發人員開發和佈署 RTPS discovery 應用時要考慮的限制：
-1）使用 UDP 阜來指定的 Domain ID 只能從 0到231（包含）。每個 Opendds 程序只能包含 120 個 doamin 。
+1）使用 UDP 阜來指定的 Domain ID 只能從 0到231（包含）。每個 OpenDDS 程序只能包含 120 個 doamin 。
 
-2）topic 和型態辨識只能小於 256 的字元
+2）Topic 和型態辨識只能小於 256 的字元
 
 3）OpenDDS 本機嘗試 RTPS Discovery 不執行因為 GUID 已分配（如果嘗試，將發出警告）。
 
@@ -245,12 +245,12 @@ mwc.pl -type <type> -features feature = 0 DDS.mwc 或者，將 line feature = 0 
 **注意:**您還可以使用 $DDS/ROOT/configure 腳本啟用或禁用功能。要禁用該功能，請將 --no-feature 傳遞給腳本，以啟用 pass --feature。在這種情況下，在名稱中使用“ - ”而不是“_”。 例如，要禁用下面討論的功能content_subscription，請將-no-content-subscription傳遞給configure腳本。
 
 ### 1.3.2禁用內置主題的構建
-特徵名稱：built_in_topics
-你可以藉由禁用內置的 topic 減少 DDS 核心函數庫減少高達30% 。看第 6 章確定如果你不需要 BIT 支援。
+特徵名稱：built_in_Topics
+你可以藉由禁用內置的 Topic 減少 DDS 核心函數庫減少高達30% 。看第 6 章確定如果你不需要 BIT 支援。
 
 ### 1.3.3禁用合規性配置文件特性的建立
 
-DDS規範定義了遵從性概況以提供用於指示DDS實現可能支持或可能不支持的某些特徵集合的通用術語。 
+DDS規範定義了遵從性概況以提供用於指示DDS實現可能支持或可能不支持的某些特徵集合的通用術語。
 DDS規範定義了 compliance profiles 提供一般術語指示哪些特定的設定 DDS 可能不會支援。
 這些配置文件以及用於禁用支持的 MPC 功能的名稱為該配置文件或該配置文件的組件
 
@@ -267,9 +267,9 @@ discussed。此外，可以執行使用該功能參照下表。
 
 | Class | Feature |
 | :--- | :--- |
-| ContentFilteredTopic | content_filtered_topic |
+| ContentFilteredTopic | content_filtered_Topic |
 | QueryCondition | query_condition |
-| MultiTopic | multi_topic |
+| MultiTopic | multi_Topic |
 
 #### 1.3.3.2持續性簡介
 
@@ -297,9 +297,4 @@ discussed。此外，可以執行使用該功能參照下表。
 
 此配置文件包括對“GROUP”的 PRESENTATION access_scope設置支援。
 
-**注意:**目前，當object_model_profile被禁用時， PRESENTATION access_scope 的 "TOPIC" 也被排除。
-
-
-
-
-
+**注意:**目前，當object_model_profile被禁用時， PRESENTATION access_scope 的 "Topic" 也被排除。
