@@ -7,4 +7,5 @@
 * [4.Conditions and Listeners](4conditions-and-listeners.md)
 * [5.Content-Subscription Profile](5content-subscription-profile.md)
 * [8.opendds\_idl Options](8openddsidl-options.md)
+* [9.The DCPS Information Repository](9the-dcps-information-repository.md)
 
