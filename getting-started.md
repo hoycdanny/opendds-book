@@ -281,13 +281,14 @@ Messenger::MessageDataWriter_var message_writer =
 ```
 對於每個循環迭代，調用 `write（）` 會將訊息分歲給所有以連線並註冊我們 topic 的 subscriber 。當 subject_id 為訊息的 key 時，在呼叫 'write()' 會去遞增 subject_id，會去新增一個新的實例(參見1.1.1.3）。'write()' 第二個參數指定正在發送的實例樣本。他將略過或是處理 'register_instance()' 或 'DDS::HANDLE_NIL' 的回傳。傳遞 DDS::HANDLE_NIL 的值藉由檢查樣本的 key 來確定實例。有關發布的實例的處理細節參考(2.2.1節)。
 
-## 2.1.4設置訂閱服務器
+## 2.1.4 設置訂閱 Subscriber
 
-訂閱者的許多代碼與我們剛剛完成瀏覽的發布商相同或類似。 我們將快速完成類似的部分，並參考上面的討論細節。 此樣本訂閱程序的完整源代碼位於$ DDS\_ROOT / DevGuideExamples / DCPS / Messenger /中的Subscriber.cpp和DataReaderListener.cpp文件中。
+Subscriber 的許多代碼與剛解釋的 publisher 類似或相似。將會快速略過相似的部分和參考討論相關的細節。
+此範例 subscriber 的完整源代碼位於 $DDS/ROOT/DevGuideExamples/DCPS/Messenger/ 中的'Subscriber.cpp'和'DataReaderListener.cpp'文件中。
 
 ### 2.1.4.1初始化參與者
 
-訂閱者的開頭與發布商相同，因為我們初始化服務並加入我們的域：
+subscriber 的開頭與 publisher 相同，我們初始化服務並加入我們的 doamin：
 
 ```cpp
 int main (int argc, char *argv[])
@@ -305,7 +306,8 @@ int main (int argc, char *argv[])
 
 ### 2.1.4.2註冊數據類型和創建主題
 
-接下來，我們初始化消息類型和主題。 請注意，如果主題已在此域中使用相同的數據類型和兼容的QoS初始化，create\_topic（）調用將返回與現有主題相對應的引用。 如果在我們的create\_topic（）調用中指定的類型或QoS與現有主題的類型或QoS不匹配，那麼調用將失敗。 還有一個find\_topic（）操作，我們的訂閱者可以使用它來簡單地檢索現有的主題。
+接下來，我們初始化訊息類型和 topic。
+注意，如果 topic 已經被初始化相同的資料型態和相容的 QoS 在這一個 domain ，'create_topic()' 會調用已經存在的 topic。如果與現有的 topic 不到符合的型態或是 QoS 'create_topic'  會調用失敗。還有一個 'find_topic()' 用來檢索存在的 topic。
 
 ```cpp
 Messenger::MessageTypeSupport_var mts =
@@ -324,9 +326,9 @@ type_name,TOPIC_QOS_DEFAULT, 0, // No listener required OpenDDS::DCPS::DEFAULT_S
  }
 ```
 
-### 2.1.4.3創建用戶
+### 2.1.4.3創建 subscriber
 
-接下來，我們創建具有默認QoS的訂戶。
+接下來，我們創建具有默認QoS的 subscriber 。
 
 ```cpp
 // Create the subscriber
@@ -339,16 +341,13 @@ type_name,TOPIC_QOS_DEFAULT, 0, // No listener required OpenDDS::DCPS::DEFAULT_S
 ```
 
 ### 2.1.4.4創建DataReader和Listener
-
-我們需要將一個監聽器對象與我們創建的數據讀取器相關聯，因此我們可以使用它來檢測數據何時可用。 下面的代碼構造監聽器對象。 DataReaderListenerImpl類在下一小節中顯示。
+我們需要一個跟我們創造的 data reader 有關的監聽物件，讓我們可以在有效資料到達時使用。下面是有關監聽物件的程式。'DataReaderListenerImpl class' 在下一小節中顯示。
 
 ```cpp
 DDS::DataReaderListener_var listener(new DataReaderListenerImpl);
 ```
-
-偵聽器在堆上分配並分配給DataReaderListener\_var對象。 此類型提供引用計數行為，因此當刪除最後一個引用時，偵聽器將自動清除。 此用法通常用於OpenDDS應用程序代碼中的堆分配，並使應用程序開發人員無需主動管理已分配對象的生命週期。
-
-現在我們可以創建數據讀取器，並將其與我們的主題，默認的QoS屬性和我們剛剛創建的監聽器對象相關聯。
+聆聽者在堆疊上分配並指派給 'DataReaderListener_var' 物件。此類型提供引用計數行為，因此當刪除最後一個引用時，聆聽者將自動清除。此用法通常用於 OpenDDS 應用程序代碼中的堆分配，並使應用程序開發人員無需主動管理已分配對象的生命週期。
+現在可以創造一個跟我們的 topic、預設 QoS 、聆聽物件有關的 Data reader 。
 
 ```cpp
  // Create the Datareader
@@ -360,7 +359,7 @@ DDS::DataReaderListener_var listener(new DataReaderListenerImpl);
  }
 ```
 
-這個線程現在可以自由地執行其他應用程序工作。 當樣本可用時，我們的偵聽器對象將在OpenDDS線程上調用。
+這個線程現在可以自由地執行其他應用程序工作。當樣本可使用時，聆聽物件將呼叫 OpenDDS 執行序。
 
 ## 2.1.5數據讀取器偵聽器實現
 
