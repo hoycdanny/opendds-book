@@ -164,9 +164,9 @@ CORBA::String_var type_name = mts->get_type_name ();
 
 我們已經創建好一個為 "Movie Discussion List" 的 topic 名稱並使用預設的 QOS。
 
-### 2.1.3.3創建發布服務器
+### 2.1.3.3 創造 Publisher
 
-現在，我們已準備好使用默認發布商QoS創建發布商。
+現在我們使用默認的 QOS 來創造 Publisher。
 
 ```cpp
 DDS::Publisher_var pub =
@@ -179,9 +179,9 @@ if (!pub) {
  }
 ```
 
-### 2.1.3.4創建DataWriter並等待訂閱服務器
+### 2.1.3.4創造 DataWriter 並等待 Subscriber
 
-隨著發布商到位，我們創建數據寫入器。
+隨著 publisher 到位，我們創造 DataWriter。
 
 ```cpp
 // Create the datawriter
@@ -196,20 +196,21 @@ if (!pub) {
  }
 ```
 
-當我們創建數據寫入器時，我們傳遞主題對象引用，默認QoS策略和空偵聽器引用。 我們現在將數據寫入器引用縮小到**MessageDataWriter**對象引用，以便我們可以使用特定於類型的發布操作。
+當我們創造 DataWriter 時，我們傳遞 topci對象引用，默認QoS策略和空偵聽器引用。 我們現在將數據寫入器引用縮小到**MessageDataWriter**對象引用，以便我們可以使用特定於類型的發布操作。
+當我們創造 DataWriter ，引用 topic 物件、預設的 QOS 和空的監聽‧。我線現在將 DataWriter 指向 MessageDataWriter 參考，之後可以使用特定類型推撥選項。
 
 ```cpp
 Messenger::MessageDataWriter_var message_writer =
  Messenger::MessageDataWriter::_narrow(writer);
 ```
 
-示例代碼使用條件和等待集，以便發布者等待訂閱者連接並完全初始化。 在這樣的簡單示例中，無法等待訂戶可能導致發布者在訂閱者連接之前發布其樣本。
+在範例代碼中使用條件和等待集，以便 publisher 等待 subscriber 連線並完成初始化。這個例子中會等待 subscriber 失敗，因為 publisher 發送了範例資料在 subscriber 連線之前。
 
 等待用戶所涉及的基本步驟是：
 
-1）從我們創建的數據寫入器獲取狀態條件
+1）從我們創建的 data writer 獲取狀態條件
 
-2）在條件中啟用“發布匹配”狀態
+2）在條件中啟用 Publication Matched 狀態
 
 3）創建等待集
 
@@ -278,8 +279,7 @@ Messenger::MessageDataWriter_var message_writer =
  }
 }
 ```
-
-對於每個循環迭代，調用`write（）`會將消息分發給為我們的主題註冊的所有連接的訂閱者。 由於subject\_id是Message的關鍵字，因此每當subject\_id增加並且`write（）`被調用時，將創建一個新的實例（參見1.1.1.3）。`write（）`的第二個參數指定了我們發布樣例的實例。 它應該傳遞由`register_instance（）`或`DDS :: HANDLE_NIL`返回的句柄。 傳遞`DDS :: HANDLE_NIL`值表示數據寫入程序應通過檢查樣本的鍵來確定實例。 有關在發布期間使用實例句柄的詳細信息，請參見第2.2.1節。
+對於每個循環迭代，調用 `write（）` 會將訊息分歲給所有以連線並註冊我們 topic 的 subscriber 。當 subject_id 為訊息的 key 時，在呼叫 'write()' 會去遞增 subject_id，會去新增一個新的實例(參見1.1.1.3）。'write()' 第二個參數指定正在發送的實例樣本。他將略過或是處理 'register_instance()' 或 'DDS::HANDLE_NIL' 的回傳。傳遞 DDS::HANDLE_NIL 的值藉由檢查樣本的 key 來確定實例。有關發布的實例的處理細節參考(2.2.1節)。
 
 ## 2.1.4設置訂閱服務器
 
