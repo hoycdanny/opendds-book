@@ -29,14 +29,14 @@ OpenDDS客戶端通常使用DCPSInfoRepo輸出的IOR文件來定位服務。 -o�
 
 #### 表9-2 為InfoRepo持久性指令
 
-| Options  | Description  | Defaults |
+| Options | Description | Defaults |
 | :---: | :---: | :---: |
 | -file | Name of the persistent file | InforepoPersist |
 | -reset | Wipe out old persistent data. | 0 \(false\) |
 
 以下指令：
 
-`static PersistenceUpdater_Static_Service "-file info.pr -reset 1"`
+`static PersistenceUpdater_Static_Service "-file info.pr -reset 1"`
 
 將持續DCPSInfoRepo更新到本地文件info.pr. 如果該名稱的文件已經存在，它的內容將被刪除。 用於與命令行選項-r，所述DCPSInfoRepo可以轉世到先前的狀態。 當使用持久性，使用具有下面的命令行選項一個TCP固定端口號開始DCPSInfoRepo過程。 這使得現有客戶端重新連接到重新啟動的InfoRepo。
 
@@ -84,11 +84,97 @@ OpenDDS通過使用服務策略的活力質量自動檢測庫損失的內置主�
 | :---: | :---: | :---: |
 | join | repoctl join &lt;target&gt; &lt;peer&gt;                   \[ &lt;federation domain&gt; \] | Calls the &lt;peer&gt; to join &lt;target&gt; to the federation.                                              &lt;federation domain&gt; is passed if present, or the default Federation Domain value is passed. |
 | leave | repoctl leave &lt;target&gt; | Causes the &lt;target&gt; to gracefully leave the federation, removing all managed associations between applications using &lt;target&gt; as a repository with applications that are not using &lt;target&gt; as a repository. |
-| shutdown | repoctl shutdown &lt;target&gt; |  |
-| kill | repoctl kill &lt;target&gt; |  |
-| help |  |  |
+| shutdown | repoctl shutdown &lt;target&gt; | Causes the &lt;target&gt; to shutdown without removing any managed associations. This is the same effect as a repository which has crashed during operation. |
+| kill | repoctl kill &lt;target&gt; | Kills the &lt;target&gt; repository regardless of its federation status. |
+| help | repoctl help  | Prints a usage message and quits. |
 
+`repoctl join 2112 otherhost:1812`
 
+這產生`corbaloc :: OTHERHOST`的`CORBA`對象引用`：1812 /`了聯邦者連接到和調用連接操作聯合器。 該加入操作調用傳遞默認聯邦域值（因為我們沒有指定一個），其通過解析對象引用`corbaloc ::localhost`獲得的接合庫的位置：2112 /聯合器。
 
+命令參數的完整說明示於表9-4。
 
+#### 表9-4為聯合會管理命令參數
+
+| Option  | Description |
+| :---: | :---: |
+| &lt;target&gt; | This is endpoint information that can be used to locate the Federator::Manager CORBA interface of a repository which is used to manage federation behavior. This is used to command leave and shutdown federation operations and to identify the joining repository for the join command. |
+| &lt;peer&gt; | This is endpoint information that can be used to locate the Federator::Manager CORBA interface of a repository which is used to manage federation behavior. This is used to command join federation operations. |
+| &lt;federation domain&gt; | This is the domain specification used by federation participants to distribute service metadata amongst the federated repositories. This only needs to be specified if more than one federation exists among the same set of repositories, which is currently not supported. The default domain is sufficient for single federations. |
+
+## 9.2.2實施例聯合會
+
+為了說明安裝和使用聯邦的，本節走過一種建立聯盟和一個使用它的工作服務一個簡單的例子。
+
+這個例子是基於兩庫聯合，與被配置為使用聯合存儲庫的簡單的消息發布者和訂閱從2.1。
+
+### 9.2.2.1配置聯合例
+
+有兩個配置文件來創建本實施例中每一個用於該消息發布者和訂閱之一。
+
+這個示例的信息發布服務器配置pub.ini如下：
+
+```cpp
+ [common]
+ DCPSDebugLevel=0
+ [domain/information]
+ DomainId=42
+ DomainRepoKey=1
+ [repository/primary]
+ RepositoryKey=1
+ RepositoryIor=corbaloc::localhost:2112/InfoRepo
+ [repository/secondary]
+ RepositoryKey=2
+ RepositoryIor=file://repo.ior
+```
+
+注意，DCPSInfo屬性/值對已經從\[共同\]部分刪去。
+
+如7.5所描述這已被替換為\[域/用戶\]部分。 用戶域是42，從而使結構域被配置為使用對服務元數據和事件的主存儲庫。
+
+的\[存儲庫/初級\]和\[庫/次級\]節定義的一級和二級存儲庫來（兩個儲存的）的聯盟內使用這種應用。 所述RepositoryKey屬性是用於唯一地標識存儲庫（並允許域與它相關聯，如在前面的\[域/信息\]部分）內部密鑰值。 該RepositoryIor屬性包含解析對象引用的字符串值達到指定的存儲庫。的主存儲庫是在本地主機的端口2112引用並預計經由TAO IORTable可用與/ InfoRepo的對象名。 二級庫，預計將提供通過在本地目錄中名為repo.ior文件的IOR值。
+
+訂閱者過程被配置為與文件sub.ini如下：
+
+```cpp
+ [common]
+ DCPSDebugLevel=0
+ [domain/information]
+ DomainId=42
+ DomainRepoKey=1
+ [repository/primary]
+ RepositoryKey=1
+ RepositoryIor=file://repo.ior
+ [repository/secondary]
+ RepositoryKey=2
+ RepositoryIor=corbaloc::localhost:2112/InfoRepo
+```
+
+注意，這是相同，除了該用戶的pub.ini文件已經指定位於所述本地主機的端口2112的存儲庫是二次和位於由repo.ior文件的庫是主。 這是分配的出版商的對面。 這意味著，當該用戶正在使用由位於該文件中包含的IOR庫開始發布商使用的倉庫處的元數據和事件端口2112開始。 在每一種情況下，如果庫被檢測為不可用的應用程序將嘗試使用其他資料庫，如果能夠達成。
+
+該庫不需要為了參加聯盟任何特殊的配置規格，因此沒有文件需要他們在這個例子中。
+
+### 9.2.2.2運行聯邦實施例
+
+例子是通過首先啟動存儲庫和建立聯盟它們，然後啟動應用程序發布者和訂閱處理方式如在第2.1.7節的例子做同樣執行。
+
+開始第一個資源庫為：
+
+```cpp
+$DDS/bin/DCPSInfoRepo -ORBSvcConf tcp.conf -o repo.ior -FederationId 1024
+```
+
+該-o repo.ior選項確保庫IOR將被放入該文件作為
+
+通過配置文件的預期。 該-FederationId 1024選項值1024分配到這個倉庫作為聯盟中唯一的ID。 該-ORBSvcConf tcp.conf選項是一樣的前面的示例所示。
+
+啟動第二個資料庫為：
+
+```
+$DDS/bin/DCPSInfoRepo -ORBSvcConf tcp.conf -ORBListenEndpoints iiop://localhost:2112 -FederationId 2048 -FederateWith file://repo.ior
+```
+
+請注意，這是所有打算成為一個單一的命令行上。 該-ORBSvcConf tcp.conf選項是一樣的前面的示例所示。 該-ORBListenEndpoints IIOP：//本地主機：2112選項確保存儲庫將是以前的配置文件都期待在端口上偵聽。 該-FederationId 2048選項指定為聯盟內的存儲庫唯一的ID值2048。 該FederateWith文件：//repo.ior選項發起聯盟與位於包含指定的文件中的IOR庫 - 寫由先前啟動庫。
+
+一旦庫已啟動，聯盟已經建立（這將自動第二庫已初始化後進行），應用程序發布和訂閱過程可以開始，因為他們沒有在第2.1.7節前面的例子應該執行。
 
