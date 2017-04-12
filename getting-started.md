@@ -4,13 +4,11 @@
 
 ## 2.1使用DCPS
 
-本章重點介紹使用DCPS將數據從單個發布者進程分發到單個訂戶進程的示例應用程序。 它基於一個簡單的信使應用程序，其中單個發布者發布消息，並且單個訂閱者訂閱它們。 我們使用默認的QoS屬性和默認的TCP / IP傳輸。 此示例的完整源代碼可以在
-
-$ DDS\_ROOT / DevGuideExamples / DCPS / Messenger /目錄。 其他DDS和DCPS功能將在後面的章節中討論。
+本章重點介紹使用 DCPS 將數據從單個 publisher 進程分發到單個 subscriber 進程的示例應用程序。它基於一個簡單的信訊息應用程序，其中單個 publisher 發布消息，並且單個 subscriber 訂閱它們。我們使用默認的 QoS 屬性和默認的 TCP/IP 傳輸。此示例的完整源代碼可以在 $DDSR/OOT/DevGuideExamples/DCPS/Messenger/ 目錄。其他 DDS 和 DCPS 功能將在後面的章節中討論。
 
 ## 2.1.1定義數據類型
 
-DDS使用的每種數據類型都是使用IDL定義的。 OpenDDS使用\#pragma指令來標識DDS傳輸和處理的數據類型。 這些數據類型由TAO IDL編譯器和OpenDDS IDL編譯器處理，以生成必要的代碼，以使用OpenDDS傳輸這些類型的數據。 這裡是定義我們的消息數據類型的IDL文件：
+DDS 使用的每種數據類型都是使用 IDL 定義的。OpenDDS使用 #pragma 指令來標識 DDS 傳輸和處理的數據類型。這些數據類型由 TAO IDL 編譯器和 OpenDDS IDL 編譯器處理，以生成必要的代碼，以使用 OpenDDS 傳輸這些類型的數據。這裡是定義我們的消息數據類型的IDL文件：
 
 ```cpp
 module Messenger {
@@ -26,35 +24,39 @@ struct Message {
 };
 ```
 
-DCPS\_DATA\_TYPE pragma標記用於OpenDDS的數據類型。必須在此pragma偽指令中使用完全作用域類型名稱。 OpenDDS要求數據類型是一個結構。
+DCPS_DATA_TYPE pragma 標記用於 OpenDDS 的數據類型。全範圍型必須配合 pragma 使用。OpenDDS 要求數據類型是一個結構。該結構可以包含純量類型（short, long, float,等）enumerations, strings,sequences, arrays, structures,和 unions。此 Opendds 範例定義了 structure Messenger 在  Messenger module 之中。
 
-該結構可以包含標量類型（短，長，浮動等），枚舉，字符串，序列，數組，結構和聯合。此示例定義了Messenger模塊中用於此OpenDDS示例的結構Message。
-
-DCPS\_DATA\_KEY pragma標識用作此類型的鍵的DCPS數據類型的字段。數據類型可以有零個或多個鍵。這些鍵用於標識主題內的不同實例。每個鍵應該是數字或枚舉類型，字符串或這些類型之一的typedef.1 pragma傳遞完全範圍類型和標識該類型的鍵的成員名。使用單獨的DCPS\_DATA\_KEY編譯指示指定多個鍵。在上面的示例中，我們將Messenger :: Message的subject\_id成員標識為鍵。以唯一subject\_id值發布的每個示例將被定義為屬於同一主題中的不同實例。由於我們使用默認QoS策略，具有相同subject\_id值的後續樣本將被視為該實例的替換值。
-
+DCPS_DATA_KEY pragma 為 DCPS 的一個辨識片斷像是這個型態的 key 。數據類型可以有零個或多個 key 。這些 key 用來分辨不同的實例在 topic 中 。
+每個 key 應該是數字或 enumerated 的型態，字串, 或這些型態的其中一種(註1)。
+pragma 通過完全範圍類型和會員名稱型態的識別 key 。複數的 key 是被單獨指定 DCPS_DATA_KEY pragmas。在範例中，我們將 Messenger::Message 當作 subject_id 的辨識。每個範例推送都有獨特的 subject_id 值在同一 topic 下來辨認屬於哪個實例。
+在使用默認的 QOS 下，具有相同 subject_id 的值會被後續相同的 subject_id 的值替換掉。
+註1.其他類型（例如structures, sequences, 和 arrays）不能直接當做 key，但是當這些members/elements是numeric, enumerated, string 類型時，structs or elements of arrays 的單個成員可以用作 key。
 ## 2.1.2處理IDL
 
-OpenDDS IDL首先由TAO IDL編譯器處理。
+OpenDDS IDL 首先由 TAO IDL編 譯器處理。
 
 `tao_idl Messenger.idl`
 
-此外，我們需要使用OpenDDS IDL編譯器處理IDL文件，以生成OpenDDS需要編譯和解密消息的序列化和密鑰支持代碼，以及數據讀取器和寫入器的類型支持代碼。 此IDL編譯器位於$ DDS\_ROOT / bin /中，並為每個處理的IDL文件生成三個文件。 這三個文件都以原始IDL文件名開頭，顯示如下：
+此外，我們需要使用OpenDDS IDL編譯器處理IDL文件，以生成OpenDDS需要編譯和解密消息的序列化和密鑰支持代碼，以及 data reader 和 data writer 支援的類型代碼。此 IDL 編譯器位於 $DDS/ROOT/bin/ 中，並為每個處理的 IDL 文件生成三個文件。這三個文件都以原始IDL文件名開頭，顯示如下：
 
-•&lt;filename&gt; TypeSupport.idl
+•<ilename>TypeSupport.idl
 
-1.其他類型（例如結構，序列和數組）不能直接用作鍵，但是當這些成員/元素是數字，枚舉或字符串類型時，結構體或數組元素的單個成員可以用作鍵。
 
-• &lt;filename&gt;TypeSupportImpl.h
 
-• &lt;filename&gt;TypeSupportImpl.cpp
+• <filename>TypeSupportImpl.h
 
-例如，運行opendds\_idl如下
+• <filename>TypeSupportImpl.cpp
 
-`opendds_idl Messenger.idl`
+例如，運行opendds_idl如下
 
-生成MessengerTypeSupport.idl，MessengerTypeSupportImpl.h和MessengerTypeSupportImpl.cpp。 IDL文件包含MessageTypeSupport，MessageDataWriter和MessageDataReader接口定義。這些是類型特定的DDS接口，我們稍後使用它們向域註冊我們的數據類型，發布該數據類型的樣本，並接收已發布的樣本。實現文件包含這些接口的實現。生成的IDL文件本身應該使用TAO IDL編譯器來編譯，以生成存根和骨架。這些和實現文件應該與使用消息類型的OpenDDS應用程序鏈接。 OpenDDS IDL編譯器有許多選項專門生成生成的代碼。這些選項在第8章中描述。
+opendds_idl Messenger.idl
 
-通常，您不直接調用上面的TAO或OpenDDS IDL編譯器，但讓您的構建環境為您做。通過從dcpsexe\_with\_tcp項目繼承，使用MPC時，簡化了整個過程。這是發布者和訂閱者共同的MPC文件部分
+生成 MessengerTypeSupport.idl，MessengerTypeSupportImpl.h和MessengerTypeSupportImpl.cpp。IDL文件包含 MessageTypeSupport，MessageDataWriter 和 MessageDataReader 接口定義。這些是類型特定的DDS接口，
+稍候我們會使用這些特別的型態註冊 domain ,推播範例的資料類型,接收推送範例。實現文件包含這些接口的實現。生成的 IDL 文件本身應該使用 TAO IDL 編譯器來編譯，以生成 stubs 和 skeletons. 。這些和實現文件應該與使用消息類型的 OpenDDS 應用程序鏈接。OpenDDS IDL編譯器有許多選項專門生成生成的代碼。這些選項在第8章中描述。
+
+通常，您不直接調用 TAO 或 OpenDDS IDL 編譯器，但讓您的構建環境為您做。
+使用 MPC 簡化整個程序藉由繼承 dcpsexe_with_tcp 專案。
+這是 publisher 和 subscriber 共同的 MPC 文件部分
 
 ```cpp
 project(*idl): dcps {
@@ -66,7 +68,7 @@ project(*idl): dcps {
 }
 ```
 
-dcps父項目添加了類型支持自定義構建規則。 上面的TypeSupport\_Files部分告訴MPC使用OpenDDS IDL編譯器從Messenger.idl生成消息類型支持文件。 這是發布商部分：
+dcps 父項目添加了類型支援自定義構建規則。上面的 TypeSupport_Files 部分告訴MPC使用 OpenDDS IDL 編譯器從 Messenger.idl 生成訊息類型支援文件。 這是 publisher  部分：
 
 ```cpp
 project(*Publisher): dcpsexe_with_tcp {
@@ -81,9 +83,9 @@ project(*Publisher): dcpsexe_with_tcp {
 }
 ```
 
-dcpsexe\_with\_tcp項目鏈接在DCPS庫中。
+dcpsexe_with_tcp 項目鏈接在DCPS庫中。
 
-為了完整性，這裡是MPC文件的訂戶部分：
+為了完整性，這裡是MPC文件的 subscriber  部分：
 
 ```cpp
 project(*Subscriber): dcpsexe_with_tcp {
@@ -99,16 +101,15 @@ Source_Files {
 }
 ```
 
-## 2.1.3簡單消息發佈器
+## 2.1.3簡單消息 Publisher
 
-在本節中，我們將介紹設置一個簡單的OpenDDS發布過程所涉及的步驟。 代碼被分成邏輯部分，並解釋為我們呈現每個部分。
+在本節中，我們將介紹設置一個簡單的 OpenDDS 推撥程序所涉及的步驟。代碼被分成邏輯部分，並解釋為我們呈現每個部分。
 
-我們省略了代碼中一些不感興趣的部分（例如\#include指令，錯誤處理和跨進程同步）。 此示例發布者的完整源代碼位於$ DDS\_ROOT / DevGuideExamples / DCPS / Messenger /中的_Publisher.cpp和Writer.cpp文件_中。
+我們省略了代碼中一些不感興趣的部分（例如 #include指令，錯誤處理和跨進程同步）。 此示例發布者的完整源代碼位於 $DDS/ROOT/DevGuideExamples/DCPS/Messenger/ 中的 Publisher.cpp 和 Writer.cpp 文件中。
 
 ### 2.1.3.1初始化參與者
 
-`main（）`的第一部分將當前進程初始化為OpenDDS參與者。
-
+`main()`的第一部分將當前進程初始化為 OpenDDS 參與者。
 ```
 int main (int argc, char *argv[]) {
  try {
@@ -125,19 +126,16 @@ int main (int argc, char *argv[]) {
   }
 ```
 
-`TheParticipantFactoryWithArgs` macro在`Service_Participant.h`中定義，並使用命令行參數初始化域參與者工廠。 這些命令行參數用於初始化OpenDDS服務使用的ORB以及服務本身。 這允許我們在命令行上傳遞`ORB_init（）`選項，以及-DCPS \*格式的OpenDDS配置選項。 可用的OpenDDS選項在第7章中有詳細描述。
+`TheParticipantFactoryWithArgs` 巨集 `Service_Participant.h` 中定義，並以命令列參數來初始化  Domain Participant Factory。這些命令參數用於初始化 ORB 也就是 OpenDDS 服務本身。這也允許我們略過 ORB_init()選項以及 OpenDDS 的 DCPS* 選項設定。可用的OpenDDS選項在第7章中有詳細描述。
 
-`create_participant（）`操作使用域參與者工廠將此進程註冊為由ID 42指定的域中的參與者。參與者使用默認QoS策略和沒有偵聽器。 OpenDDS默認狀態掩碼的使用確保中間件中的所有相關通信狀態改變（例如，可用的數據，活力丟失）被傳送到應用程序（例如，通過收聽者上的回調）。
+`create_participant()` 使用domain 參與工廠註冊 ID 42 的 domain。參與者使用默認的 QOS 而且沒有監聽者。使用 OpenSSD 默認狀態遮罩確保所有相關的溝通狀態改變(像是 資料可用性、liveliness lost)中介層可以和應用層溝通(像是 通過監聽者回傳)。
 
-用戶可以使用範圍（0x0〜0x7FFFFFFF）中的ID定義任意數量的域。 所有其他值保留供實施內部使用。
+可以定義 doamin ID 範圍(0x00000000 ~ 0x7FFFFFFF)。其他保留值為內部使用。
+Domain Participant 物件引用我們註冊的訊息資料型態。
 
-返回的域參與者對象引用然後用於註冊我們的消息數據類型。
+### 2.1.3.2註冊數據類型和創建 Topic
 
-### 2.1.3.2註冊數據類型和創建主題
-
-首先，我們創建一個MessageTypeSupportImpl對象，然後註冊一個類型的類型
-
-名稱使用`register_type（）`操作。 在此示例中，我們使用nil字符串類型名稱註冊該類型，這將使MessageTypeSupport接口存儲庫標識符用作類型名稱。 也可以使用諸如“消息”的特定類型名稱。
+首先，我們創建一個 MessageTypeSupportImpl 的物件並用註冊 register_type() 。在此範例中註冊一個空字串的型態，這會使 MessageTypeSupportImpl 為接口辨識名稱。也可以使用"Message" 為該特定辨識名稱。
 
 ```cpp
  Messenger::MessageTypeSupport_var mts =
@@ -148,7 +146,7 @@ int main (int argc, char *argv[]) {
  }
 ```
 
-接下來，我們從類型支持對象獲取註冊的類型名稱，並通過將類型名稱傳遞給`create_topic（）`操作中的參與者來創建主題。
+接下來，我們註冊該類型名稱並且創建 topic 藉由使用 create_topic()。
 
 ```cpp
 CORBA::String_var type_name = mts->get_type_name ();
@@ -164,11 +162,11 @@ CORBA::String_var type_name = mts->get_type_name ();
  }
 ```
 
-我們已經創建了一個名為“電影討論列表”的主題，註冊類型和默認QoS策略。
+我們已經創建好一個為 "Movie Discussion List" 的 topic 名稱並使用預設的 QOS。
 
-### 2.1.3.3創建發布服務器
+### 2.1.3.3 創造 Publisher
 
-現在，我們已準備好使用默認發布商QoS創建發布商。
+現在我們使用默認的 QOS 來創造 Publisher。
 
 ```cpp
 DDS::Publisher_var pub =
@@ -181,9 +179,9 @@ if (!pub) {
  }
 ```
 
-### 2.1.3.4創建DataWriter並等待訂閱服務器
+### 2.1.3.4創造 DataWriter 並等待 Subscriber
 
-隨著發布商到位，我們創建數據寫入器。
+隨著 publisher 到位，我們創造 DataWriter。
 
 ```cpp
 // Create the datawriter
@@ -198,20 +196,21 @@ if (!pub) {
  }
 ```
 
-當我們創建數據寫入器時，我們傳遞主題對象引用，默認QoS策略和空偵聽器引用。 我們現在將數據寫入器引用縮小到**MessageDataWriter**對象引用，以便我們可以使用特定於類型的發布操作。
+當我們創造 DataWriter 時，我們傳遞 topci對象引用，默認QoS策略和空偵聽器引用。 我們現在將數據寫入器引用縮小到**MessageDataWriter**對象引用，以便我們可以使用特定於類型的發布操作。
+當我們創造 DataWriter ，引用 topic 物件、預設的 QOS 和空的監聽‧。我線現在將 DataWriter 指向 MessageDataWriter 參考，之後可以使用特定類型推撥選項。
 
 ```cpp
 Messenger::MessageDataWriter_var message_writer =
  Messenger::MessageDataWriter::_narrow(writer);
 ```
 
-示例代碼使用條件和等待集，以便發布者等待訂閱者連接並完全初始化。 在這樣的簡單示例中，無法等待訂戶可能導致發布者在訂閱者連接之前發布其樣本。
+在範例代碼中使用條件和等待集，以便 publisher 等待 subscriber 連線並完成初始化。這個例子中會等待 subscriber 失敗，因為 publisher 發送了範例資料在 subscriber 連線之前。
 
 等待用戶所涉及的基本步驟是：
 
-1）從我們創建的數據寫入器獲取狀態條件
+1）從我們創建的 data writer 獲取狀態條件
 
-2）在條件中啟用“發布匹配”狀態
+2）在條件中啟用 Publication Matched 狀態
 
 3）創建等待集
 
@@ -280,16 +279,16 @@ Messenger::MessageDataWriter_var message_writer =
  }
 }
 ```
+對於每個循環迭代，調用 `write（）` 會將訊息分歲給所有以連線並註冊我們 topic 的 subscriber 。當 subject_id 為訊息的 key 時，在呼叫 'write()' 會去遞增 subject_id，會去新增一個新的實例(參見1.1.1.3）。'write()' 第二個參數指定正在發送的實例樣本。他將略過或是處理 'register_instance()' 或 'DDS::HANDLE_NIL' 的回傳。傳遞 DDS::HANDLE_NIL 的值藉由檢查樣本的 key 來確定實例。有關發布的實例的處理細節參考(2.2.1節)。
 
-對於每個循環迭代，調用`write（）`會將消息分發給為我們的主題註冊的所有連接的訂閱者。 由於subject\_id是Message的關鍵字，因此每當subject\_id增加並且`write（）`被調用時，將創建一個新的實例（參見1.1.1.3）。`write（）`的第二個參數指定了我們發布樣例的實例。 它應該傳遞由`register_instance（）`或`DDS :: HANDLE_NIL`返回的句柄。 傳遞`DDS :: HANDLE_NIL`值表示數據寫入程序應通過檢查樣本的鍵來確定實例。 有關在發布期間使用實例句柄的詳細信息，請參見第2.2.1節。
+## 2.1.4 設置訂閱 Subscriber
 
-## 2.1.4設置訂閱服務器
-
-訂閱者的許多代碼與我們剛剛完成瀏覽的發布商相同或類似。 我們將快速完成類似的部分，並參考上面的討論細節。 此樣本訂閱程序的完整源代碼位於$ DDS\_ROOT / DevGuideExamples / DCPS / Messenger /中的Subscriber.cpp和DataReaderListener.cpp文件中。
+Subscriber 的許多代碼與剛解釋的 publisher 類似或相似。將會快速略過相似的部分和參考討論相關的細節。
+此範例 subscriber 的完整源代碼位於 $DDS/ROOT/DevGuideExamples/DCPS/Messenger/ 中的'Subscriber.cpp'和'DataReaderListener.cpp'文件中。
 
 ### 2.1.4.1初始化參與者
 
-訂閱者的開頭與發布商相同，因為我們初始化服務並加入我們的域：
+subscriber 的開頭與 publisher 相同，我們初始化服務並加入我們的 doamin：
 
 ```cpp
 int main (int argc, char *argv[])
@@ -307,7 +306,8 @@ int main (int argc, char *argv[])
 
 ### 2.1.4.2註冊數據類型和創建主題
 
-接下來，我們初始化消息類型和主題。 請注意，如果主題已在此域中使用相同的數據類型和兼容的QoS初始化，create\_topic（）調用將返回與現有主題相對應的引用。 如果在我們的create\_topic（）調用中指定的類型或QoS與現有主題的類型或QoS不匹配，那麼調用將失敗。 還有一個find\_topic（）操作，我們的訂閱者可以使用它來簡單地檢索現有的主題。
+接下來，我們初始化訊息類型和 topic。
+注意，如果 topic 已經被初始化相同的資料型態和相容的 QoS 在這一個 domain ，'create_topic()' 會調用已經存在的 topic。如果與現有的 topic 不到符合的型態或是 QoS 'create_topic'  會調用失敗。還有一個 'find_topic()' 用來檢索存在的 topic。
 
 ```cpp
 Messenger::MessageTypeSupport_var mts =
@@ -326,9 +326,9 @@ type_name,TOPIC_QOS_DEFAULT, 0, // No listener required OpenDDS::DCPS::DEFAULT_S
  }
 ```
 
-### 2.1.4.3創建用戶
+### 2.1.4.3創建 subscriber
 
-接下來，我們創建具有默認QoS的訂戶。
+接下來，我們創建具有默認QoS的 subscriber 。
 
 ```cpp
 // Create the subscriber
@@ -341,16 +341,13 @@ type_name,TOPIC_QOS_DEFAULT, 0, // No listener required OpenDDS::DCPS::DEFAULT_S
 ```
 
 ### 2.1.4.4創建DataReader和Listener
-
-我們需要將一個監聽器對象與我們創建的數據讀取器相關聯，因此我們可以使用它來檢測數據何時可用。 下面的代碼構造監聽器對象。 DataReaderListenerImpl類在下一小節中顯示。
+我們需要一個跟我們創造的 data reader 有關的監聽物件，讓我們可以在有效資料到達時使用。下面是有關監聽物件的程式。'DataReaderListenerImpl class' 在下一小節中顯示。
 
 ```cpp
 DDS::DataReaderListener_var listener(new DataReaderListenerImpl);
 ```
-
-偵聽器在堆上分配並分配給DataReaderListener\_var對象。 此類型提供引用計數行為，因此當刪除最後一個引用時，偵聽器將自動清除。 此用法通常用於OpenDDS應用程序代碼中的堆分配，並使應用程序開發人員無需主動管理已分配對象的生命週期。
-
-現在我們可以創建數據讀取器，並將其與我們的主題，默認的QoS屬性和我們剛剛創建的監聽器對象相關聯。
+聆聽者在堆疊上分配並指派給 'DataReaderListener_var' 物件。此類型提供引用計數行為，因此當刪除最後一個引用時，聆聽者將自動清除。此用法通常用於 OpenDDS 應用程序代碼中的堆分配，並使應用程序開發人員無需主動管理已分配對象的生命週期。
+現在可以創造一個跟我們的 topic、預設 QoS 、聆聽物件有關的 Data reader 。
 
 ```cpp
  // Create the Datareader
@@ -362,7 +359,7 @@ DDS::DataReaderListener_var listener(new DataReaderListenerImpl);
  }
 ```
 
-這個線程現在可以自由地執行其他應用程序工作。 當樣本可用時，我們的偵聽器對象將在OpenDDS線程上調用。
+這個線程現在可以自由地執行其他應用程序工作。當樣本可使用時，聆聽物件將呼叫 OpenDDS 執行序。
 
 ## 2.1.5數據讀取器偵聽器實現
 
@@ -589,7 +586,8 @@ Messenger::Message message;
   message_writer->register_instance(message);
 ```
 
-在填充消息結構之後，我們調用`register_instance()`函數註冊實例。 實例由subject\_id值99標識（因為我們之前將該字段指定為鍵）。我們稍後可以在發布樣本時使用返回的實例句柄：
+在填充消息結構之後，我們調用`register_instance()`函數註冊實例。 實例由subject\_id值99標識（因為我們之前將該字段指定為鍵）。
+我們稍後可以在發布樣本時使用返回的實例句柄：
 
 ```cpp
 DDS::ReturnCode_t ret = data_writer->write(message, handle);
