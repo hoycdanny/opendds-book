@@ -1,4 +1,4 @@
-# CHAPTER 11 
+# CHAPTER 11
 
 # Modeling SDK
 
@@ -46,15 +46,16 @@ OpenDDS Modeling SDK是可以由應用程序使用的建模工具
 
 •Java運行時環境（JRE）
 
-- 版本6更新24（1.6.0\_24）是本文撰寫的最新版本
+* 版本6更新24（1.6.0\_24）是本文撰寫的最新版本
 
-- 從[http://www.java.com](http://www.java.com)下載
+* 從[http://www.java.com](http://www.java.com)下載
 
 •Eclipse IDE
 
-- 4.4版“Luna”，4.4.1是本文的最新版本
+* 4.4版“Luna”，4.4.1是本文的最新版本
 
-- 下載網址[https://eclipse.org/downloads/packages/release/Luna/SR1A](https://eclipse.org/downloads/packages/release/Luna/SR1A)
+* 下載  
+  網址[https://eclipse.org/downloads/packages/release/Luna/SR1A](https://eclipse.org/downloads/packages/release/Luna/SR1A)
 
 ## 11.2.2安裝
 
@@ -66,7 +67,8 @@ OpenDDS Modeling SDK是可以由應用程序使用的建模工具
 
 10\) 應啟用標準的eclipse.org網站\(Eclipse Project Updates和Galileo\)。 如果它們被禁用，請立即啟用它們。
 
-11\) 添加一個名為OpenDDS的新站點條目，URL為[http://www.opendds.org/modeling/eclipse\_44](http://www.opendds.org/modeling/eclipse_44)
+11\) 添加一個名為OpenDDS的新站點條目，URL為[http://www.opendds.org/modeling/eclipse\_44  
+](http://www.opendds.org/modeling/eclipse_44)
 
 12\) 單擊“確定”關閉“首選項”對話框並返回到“安裝”對話框。
 
