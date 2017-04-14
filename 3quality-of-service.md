@@ -1,10 +1,10 @@
-* [ ] # CHAPTER 3
+# CHAPTER 3
 
 ### Quality of Service
 
 # 3.1 介紹
 
-前面的示例為各種實體使用默認QoS策略。 本章將討論在OpenDDS中實現的QoS策略及其使用的細節。 有關本章中討論的策略的更多信息，請參閱DDS規範。
+前面的範例為各種實體使用預設QoS策略。 本章將討論在OpenDDS中實現的QoS策略及其使用的細節。 有關本章中討論的策略的更多信息，請參閱DDS規格。
 
 # 3.2 QoS策略
 
@@ -519,9 +519,9 @@ struct EntityFactoryQosPolicy {
 
 此政策的值可能隨時更改。對此策略的更改僅影響更改後創建的實體。
 
-## 3.2.17PRESENTATION 
+## 3.2.17PRESENTATION
 
-`PRESENTATION `QoS策略控制發布者對實例的更改如何呈現給數據讀取器。 它影響這些更改的相對順序和此順序的範圍。 此外，該策略引入了相干改變集的概念。 這裡是演示QoS的IDL：
+`PRESENTATION`QoS策略控制發布者對實例的更改如何呈現給數據讀取器。 它影響這些更改的相對順序和此順序的範圍。 此外，該策略引入了相干改變集的概念。 這裡是演示QoS的IDL：
 
 ```cpp
 enum PresentationQosPolicyAccessScopeKind {
@@ -540,21 +540,21 @@ struct PresentationQosPolicy {
 
 注意：
 
-- `INSTANCE_PRESENTATION_QOS`（默認值）表示獨立對實例進行更改。實例訪問基本上作為針對`coherent_access`和`ordered_access`的無操作。將這些值之一設置為true在訂閱應用程序中沒有可觀察到的影響。
+* `INSTANCE_PRESENTATION_QOS`（默認值）表示獨立對實例進行更改。實例訪問基本上作為針對`coherent_access`和`ordered_access`的無操作。將這些值之一設置為true在訂閱應用程序中沒有可觀察到的影響。
 
-- `TOPIC_PRESENTATION_QOS`表示接受的更改僅限於同一數據讀取器或數據寫入器中的所有實例。
+* `TOPIC_PRESENTATION_QOS`表示接受的更改僅限於同一數據讀取器或數據寫入器中的所有實例。
 
-- `GROUP_PRESENTATION_QOS`表示接受的更改僅限於同一發布商或訂閱者中的所有實例。
+* `GROUP_PRESENTATION_QOS`表示接受的更改僅限於同一發布商或訂閱者中的所有實例。
 
 相干改變（`coherent_access`）允許實例的一個或多個改變作為單個改變對相關聯的數據讀取器可用。如果數據讀取器未接收到發布者做出的整組一致的改變，則沒有任何改變可用。連貫變化的語義在本質上與許多關係數據庫提供的事務中的語義相似。默認情況下，`coherent_access`為`false`。
 
-還可以按照由發布者發送的順序（`ordered_access`）向相關聯的數據讀取器提供改變。這在性質上類似於`DESTINATION_ORDER `QoS策略，然而`ordered_access`允許獨立於實例排序來對數據進行排序。默認情況下，`ordered_access`為`false`。
+還可以按照由發布者發送的順序（`ordered_access`）向相關聯的數據讀取器提供改變。這在性質上類似於`DESTINATION_ORDER`QoS策略，然而`ordered_access`允許獨立於實例排序來對數據進行排序。默認情況下，`ordered_access`為`false`。
 
 **注意:**該策略控制對訂戶可用的樣本的排序和範圍，但是訂戶應用必須在讀取樣本時使用適當的邏輯以保證所請求的行為。 有關更多詳細信息，請參閱版本1.4 DDS規範的第2.2.2.5.1.9節。
 
 ## 3.2.18 DESTINATION\_ORDER
 
-`DESTINATION_ORDER `QoS策略控制給定實例中的樣本對數據讀取器可用的順序。 如果指定歷史深度為1（默認值），則實例將反映所有數據寫入程序寫入該實例的最新值。 以下是目標訂單的IDL：
+`DESTINATION_ORDER`QoS策略控制給定實例中的樣本對數據讀取器可用的順序。 如果指定歷史深度為1（默認值），則實例將反映所有數據寫入程序寫入該實例的最新值。 以下是目標訂單的IDL：
 
 ```cpp
 enum DestinationOrderQosPolicyKind {
@@ -572,7 +572,7 @@ struct DestinationOrderQosPolicy {
 
 ## 3.2.19 WRITER\_DATA\_LIFECYCLE
 
-`WRITER_DATA_LIFECYCLE `QoS策略控制數據寫入器管理的數據實例的生命週期。 以下是Writer數據生命週期QoS策略的IDL：
+`WRITER_DATA_LIFECYCLE`QoS策略控制數據寫入器管理的數據實例的生命週期。 以下是Writer數據生命週期QoS策略的IDL：
 
 ```cpp
 struct WriterDataLifecycleQosPolicy {
@@ -586,7 +586,7 @@ struct WriterDataLifecycleQosPolicy {
 
 ## 3.2.20 READER\_DATA\_LIFECYCLE
 
-`READER_DATA_LIFECYCLE `QoS策略控制由數據讀取器管理的數據實例的生命週期。 以下是`Reader Data Lifecycle` QoS策略的IDL：
+`READER_DATA_LIFECYCLE`QoS策略控制由數據讀取器管理的數據實例的生命週期。 以下是`Reader Data Lifecycle` QoS策略的IDL：
 
 ```cpp
 struct ReaderDataLifecycleQosPolicy {
@@ -605,7 +605,7 @@ struct ReaderDataLifecycleQosPolicy {
 
 ## 3.2.21 TIME\_BASED\_FILTER
 
-`TIME_BASED_FILTER `QoS策略控制數據讀取器對數據實例的值更改感興趣的頻率。 這裡是基於時間的過濾器的IDL QoS：
+`TIME_BASED_FILTER`QoS策略控制數據讀取器對數據實例的值更改感興趣的頻率。 這裡是基於時間的過濾器的IDL QoS：
 
 ```cpp
 struct TimeBasedFilterQosPolicy {
