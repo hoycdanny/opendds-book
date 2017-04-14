@@ -21,7 +21,7 @@ OpenDDS 是 C++ 所寫的開原軟體，OCI 提供 OMG's DDS 規範開發和商�
 
 圖1-1顯示了DDS DCPS層的概述。 子節點的概念定義再下面那張圖中所示。
 
-### ![](/1.1.jpg)
+### ![](/images/1.1.jpg)
 
 ### 1.1.1.1 Domain
 
@@ -171,7 +171,7 @@ OpenDDS 實現和 API 基於對 OMG IDL PSM 的相當嚴格的解釋。幾乎在
 
 OpenDDS使用 DDS 規範定義的 IDL 接口來初始化和控制服務使用。數據傳輸通過 OpenDDS 特定的傳輸框架來實現，該傳輸框架允許服務與各種傳輸協議一起使用。這被稱為可插拔傳輸，使 OpenDDS 的可擴展性成為其架構的重要組成部分。 OpenDDS目前支持 TCP/IP，UDP/IP ，IP multicast，共享存儲和 RTPS_UDP 傳輸協議，如圖1-2所示。傳輸通常通過配置文件指定，並附加到發布者和訂閱者進程中的各種實體。有關配置ETF組件的詳細信息，請參見第7.4.4節。
 
-![](/1.2.jpg)
+![](/images/1.2.jpg)
 
 ETF使應用程序開發人員能夠實現自己的定制傳輸。實現自定義傳輸需要在多個特定傳輸框架之下。 UDP 傳輸提供了開發人員在創建自己的實體時可以使用的良好基礎。 有關詳細信息，請參閱$DDS_ROOT/dds/DCPS/transport/UDP/ 目錄。
 
@@ -191,7 +191,7 @@ OpenDDS 提供兩個發現選項。
 
 OpenDDS實現一個稱為DCPS的獨立訊息服務（DCPSInfoRepo）實現集中式發現方法。它被實現為 CORBA 服務器。當客戶端請求預訂 Topic 時，DCPS 信息庫確認訂閱者的位置並通知給所有存在的通送者新的接收者的位置。在不是使用 RTPS 設定時 DCPSInfoRepo 將會啟用。RTPS 啟動時不會使用 DCPSInfoRepo 。DCPSInfoRepo不參與數據傳播，其作用只用於 OpenDDS 應用程式發現彼此。
 
-![](/1.3.jpg)
+![](/images/1.3.jpg)
 
 應用程序開發人員可以自由運行多個信息庫，每個管理其自己的非重疊的DCPS域集合。
 
