@@ -13,5 +13,4 @@
 * [10.Java Bindings](10java-bindings.md)
 * [11.Modeling SDK](11modeling-sdk.md)
 * [12.Recorder and Replayer](12recorder-and-replayer.md)
-* 7.Run-time Configuration
 
