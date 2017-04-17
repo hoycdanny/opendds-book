@@ -7,7 +7,7 @@
 * [4.Conditions and Listeners](4-conditions-and-listeners.md)
 * [5.Content-Subscription Profile](5-content-subscription-profile.md)
 * [6.Built-In Topics](6.md)
-* 7.Run-time Configuration
+* [7.Run-time Configuration](7run-time-configuration.md)
 * [8.opendds\_idl Options](8-openddsidl-options.md)
 * [9.The DCPS Information Repository](9-the-dcps-information-repository.md)
 * [10.Java Bindings](10java-bindings.md)
