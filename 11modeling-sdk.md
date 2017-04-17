@@ -67,7 +67,7 @@ OpenDDS Modeling SDK是可以由應用程序使用的建模工具
 
 10\) 應啟用標準的eclipse.org網站\(Eclipse Project Updates和Galileo\)。 如果它們被禁用，請立即啟用它們。
 
-11\) 添加一個名為OpenDDS的新站點條目，URL為[http://www.opendds.org/modeling/eclipse\_44    
+11\) 添加一個名為OpenDDS的新站點條目，URL為[http://www.opendds.org/modeling/eclipse\_44      
 ](http://www.opendds.org/modeling/eclipse_44)
 
 12\) 單擊“確定”關閉“首選項”對話框並返回到“安裝”對話框。
@@ -256,6 +256,269 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
     MinimalLib::DefaultMinimalType model(application, argc, argv);
     using OpenDDS::Model::MinimalLib::Elements;
     DDS::DataWriter_var writer = model.writer(Elements::DataWriters::writer);
+```
+
+剩下的是將DataWriter縮小到類型特定的數據寫入器，並發送樣本。
+
+```cpp
+data1::MessageDataWriter_var msg_writer =
+    data1::MessageDataWriter::_narrow(writer);
+data1::Message message;
+// Populate message and send
+message.text = "Worst. Movie. Ever.";
+DDS::ReturnCode_t error = msg_writer->write(message, DDS::HANDLE_NIL);
+if (error != DDS::RETCODE_OK) {
+    // Handle error
+}
+```
+
+整體來說，我們的發布應用程序MinimalPublisher.cpp看起來像這樣：
+
+```cpp
+#ifdef ACE_AS_STATIC_LIBS
+#include <dds/DCPS/transport/tcp/Tcp.h>
+#endif
+#include "model/MinimalTraits.h"
+int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
+{
+    try {
+        OpenDDS::Model::Application application(argc, argv);
+        MinimalLib::DefaultMinimalType model(application, argc, argv);
+        using OpenDDS::Model::MinimalLib::Elements;
+        DDS::DataWriter_var writer = model.writer(Elements::DataWriters::writer);
+        data1::MessageDataWriter_var msg_writer =
+            data1::MessageDataWriter::_narrow(writer);
+        data1::Message message;
+        // Populate message and send
+        message.text = "Worst. Movie. Ever.";
+        DDS::ReturnCode_t error = msg_writer->write(message, DDS::HANDLE_NIL);
+        if (error != DDS::RETCODE_OK) {
+            // Handle error
+        }
+        } catch (const CORBA::Exception& e) {
+        // Handle exception and return non-zero
+        } catch (const std::exception& ex) {
+        // Handle exception and return non-zero
+}
+return 0;
+}
+```
+
+請注意，此最小範例忽略日誌記錄和同步，這些問題不是OpenDDS Modeling SDK特有的。
+
+### 11.3.3.5用戶代碼
+
+訂閱者代碼很像發布商。 為了簡單起見，OpenDDS Modeling SDK訂閱者可能希望利用名為OpenDDS :: Modeling :: NullReaderListener的Reader Listener的基類。 NullReaderListener實現整個DataReaderListener接口並記錄每個回調。
+
+訂閱者可以通過從NullReaderListener派生一個類並重寫感興趣的接口，例如on\_data\_available來創建一個監聽器。
+
+```cpp
+#ifdef ACE_AS_STATIC_LIBS
+#include <dds/DCPS/transport/tcp/Tcp.h>
+#endif
+#include "model/MinimalTraits.h"
+#include <model/NullReaderListener.h>
+class ReaderListener : public OpenDDS::Model::NullReaderListener {
+public:
+    virtual void on_data_available(DDS::DataReader_ptr reader)
+        ACE_THROW_SPEC((CORBA::SystemException)) {
+    data1::MessageDataReader_var reader_i =
+            data1::MessageDataReader::_narrow(reader);
+    if (!reader_i) {
+        // Handle error
+        ACE_OS::exit(-1);
+    }
+    data1::Message msg;
+    DDS::SampleInfo info;
+    // Read until no more messages
+    while (true) {
+    DDS::ReturnCode_t error = reader_i->take_next_sample(msg, info);
+    if (error == DDS::RETCODE_OK) {
+        if (info.valid_data) {
+            std::cout << "Message: " << msg.text.in() << std::endl;
+    }
+        } else {
+            if (error != DDS::RETCODE_NO_DATA) {
+            // Handle error
+            }
+            break;
+            }
+        }
+    }
+};
+```
+
+在主要功能中，從服務對象創建數據讀取器：
+
+```cpp
+DDS::DataReader_var reader = model.reader(Elements::DataReaders::reader);
+```
+
+當然，DataReaderListener必須與數據讀取器相關聯才能獲得它的回傳。
+
+```cpp
+DDS::DataReaderListener_var listener(new ReaderListener);
+reader->set_listener(listener, OpenDDS::DCPS::DEFAULT_STATUS_MASK);
+```
+
+剩餘的用戶代碼與任何OpenDDS建模SDK應用程序的要求相同，因為它必須通過OpenDDS :: Modeling :: Application對像初始化OpenDDS庫，並使用適當的DCPS模型Elements類和traits類創建一個Service對象。
+
+下面是一個例子訂閱應用程序MinimalSubscriber.cpp。
+
+```cpp
+#ifdef ACE_AS_STATIC_LIBS
+#include <dds/DCPS/transport/tcp/Tcp.h>
+#endif
+#include "model/MinimalTraits.h"
+#include <model/NullReaderListener.h>
+class ReaderListener : public OpenDDS::Model::NullReaderListener {
+public:
+    virtual void on_data_available(DDS::DataReader_ptr reader)
+                ACE_THROW_SPEC((CORBA::SystemException)) {
+        data1::MessageDataReader_var reader_i =
+            data1::MessageDataReader::_narrow(reader);
+        if (!reader_i) {
+            // Handle error
+            ACE_OS::exit(-1);
+        }
+        data1::Message msg;
+        DDS::SampleInfo info;
+        // Read until no more messages
+        while (true) {
+            DDS::ReturnCode_t error = reader_i->take_next_sample(msg, info);
+            if (error == DDS::RETCODE_OK) {
+                if (info.valid_data) {
+                    std::cout << "Message: " << msg.text.in() << std::endl;
+            }
+                } else {
+                if (error != DDS::RETCODE_NO_DATA) {
+                // Handle error
+                }
+                break;
+            }
+        }
+    }
+};
+
+int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
+{
+try {
+    OpenDDS::Model::Application application(argc, argv);
+    MinimalLib::DefaultMinimalType model(application, argc, argv);
+    using OpenDDS::Model::MinimalLib::Elements;
+    DDS::DataReader_var reader = model.reader(Elements::DataReaders::reader);
+    DDS::DataReaderListener_var listener(new ReaderListener);
+    reader->set_listener(listener, OpenDDS::DCPS::DEFAULT_STATUS_MASK);
+    // Call on_data_available in case there are samples which are waiting
+    listener->on_data_available(reader);
+    // At this point the application can wait for an exteral “stop” indication
+    // such as blocking until the user terminates the program with Ctrl-C.
+    } catch (const CORBA::Exception& e) {
+    e._tao_print_exception("Exception caught in main():");
+    return -1;
+    } catch (const std::exception& ex) {
+    // Handle error
+        return -1;
+    }
+    return 0;
+}
+```
+
+### 11.3.3.6 MPC項目
+
+為了利用OpenDDS Modeling SDK支持庫，OpenDDS Modeling SDK MPC項目應該從dds\_model項目基礎繼承。 這是除了非建模SDK項目繼承的dcpsexe基礎之外的。
+
+```cpp
+project(*Publisher) : dcpsexe, dds_model {
+// project configuration
+}
+```
+
+生成的模型庫將在目標目錄中生成MPC項目文件和基礎項目文件，並負責構建模型共享庫。 OpenDDS建模應用程序必須（1）在其構建中包括生成的模型庫，（2）確保在生成的模型庫後構建其項目。
+
+```cpp
+project(*Publisher) : dcpsexe, dds_model {
+    // project configuration
+    libs += Minimal
+    after += Minimal
+}
+```
+
+這兩個都可以通過從模組資料庫的項目基礎繼承，以模組資料庫命名。
+
+```cpp
+project(*Publisher) : dcpsexe, dds_model, Minimal {
+// project configuration
+}
+```
+
+請注意，在創建項目文件期間，MPC現在可以找到Minimal.mpb文件。 這可以通過--include命令行選項來實現。
+
+使用任一形式，MPC文件必須告訴構建系統在哪裡查找生成的模型庫。
+
+```cpp
+project(*Publisher) : dcpsexe, dds_model, Minimal {
+    // project configuration
+    libpaths += model
+}
+```
+
+此設置基於Codegen文件編輯器中提供給目標文件夾設置的內容。
+
+最後，像其他MPC項目一樣，它的源文件必須包括在內：
+
+```cpp
+Source_Files {
+    MinimalPublisher.cpp
+}
+```
+
+最終的MPC項目對於出版商來說是這樣的：
+
+```cpp
+project(*Publisher) : dcpsexe, dds_model, Minimal {
+    exename = publisher
+    libpaths += model
+    Source_Files {
+    MinimalPublisher.cpp
+    }
+}
+```
+
+對於訂閱者也是如此：
+
+```cpp
+project(*Subscriber) : dcpsexe, dds_model, Minimal {
+exename = subscriber
+libpaths += model
+Source_Files {
+MinimalSubscriber.cpp
+}
+}
+```
+
+### 11.3.3.7模組之間的依賴關係
+
+一個最後的考慮 - 生成的模型庫本身可以依賴於其他生成的模型庫。 例如，可能會有一個外部數據類型庫被生成到不同的目錄。
+
+這種可能性可能會導致大量的項目文件維護，隨著模型隨著時間的推移而改變其依賴性。 為了幫助克服這個負擔，生成的模型庫在一個名為&lt;ModelName&gt; \_paths.mpb的單獨的MPB文件中記錄了所有外部引用的模型庫的路徑。 從這個路徑繼承基礎項目將繼承所需的設置以包括依賴模型。
+
+我們的完整MPC文件如下所示：
+
+```cpp
+project(*Publisher) : dcpsexe, dds_model, Minimal, Minimal_paths {
+    exename = publisher
+    libpaths += model
+    Source_Files {
+    MinimalPublisher.cpp
+    }
+}
+    project(*Subscriber) : dcpsexe, dds_model, Minimal, Minimal_paths {
+    exename = subscriber
+    libpaths += model
+    Source_Files {
+    MinimalSubscriber.cpp
+}
 ```
 
 

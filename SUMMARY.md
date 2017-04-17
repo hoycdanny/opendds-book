@@ -11,4 +11,6 @@
 * [9.The DCPS Information Repository](9-the-dcps-information-repository.md)
 * [10.Java Bindings](10java-bindings.md)
 * [11.Modeling SDK](11modeling-sdk.md)
+* [12.Recorder and Replayer](12recorder-and-replayer.md)
+* 13.Safety Profile
 
