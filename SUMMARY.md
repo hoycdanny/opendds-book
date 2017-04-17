@@ -10,4 +10,5 @@
 * [8.opendds\_idl Options](8-openddsidl-options.md)
 * [9.The DCPS Information Repository](9-the-dcps-information-repository.md)
 * [10.Java Bindings](10java-bindings.md)
+* [11.Modeling SDK](11modeling-sdk.md)
 
