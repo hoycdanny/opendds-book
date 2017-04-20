@@ -126,7 +126,7 @@ int main (int argc, char *argv[]) {
   }
 ```
 
-`TheParticipantFactoryWithArgs` 巨集 `Service_Participant.h` 中定義，並以命令列參數來初始化  Domain Participant Factory。這些命令參數用於初始化 ORB 也就是 OpenDDS 服務本身。這也允許我們略過 ORB_init()選項以及 OpenDDS 的 DCPS* 選項設定。可用的OpenDDS選項在第7章中有詳細描述。
+`TheParticipantFactoryWithArgs` 在 `Service_Participant.h` 中定義，並以命令列參數來初始化  Domain Participant Factory。這些命令參數用於初始化 ORB 也就是 OpenDDS 服務本身。這也允許我們略過 ORB_init()選項以及 OpenDDS 的 DCPS* 選項設定。可用的OpenDDS選項在第7章中有詳細描述。
 
 `create_participant()` 使用domain 參與工廠註冊 ID 42 的 domain。參與者使用默認的 QOS 而且沒有監聽者。使用 OpenSSD 默認狀態遮罩確保所有相關的溝通狀態改變(像是 資料可用性、liveliness lost)中介層可以和應用層溝通(像是 通過監聽者回傳)。
 
