@@ -29,7 +29,7 @@ DCPS_DATA_TYPE pragma 標記用於 OpenDDS 的數據類型。全範圍型必須�
 DCPS_DATA_KEY pragma 為 DCPS 的一個辨識片斷像是這個型態的 key 。數據類型可以有零個或多個 key 。這些 key 用來分辨不同的實例在 topic 中 。
 每個 key 應該是數字或 enumerated 的型態，字串, 或這些型態的其中一種(註1)。
 pragma 通過完全範圍類型和會員名稱型態的識別 key 。複數的 key 是被單獨指定 DCPS_DATA_KEY pragmas。在範例中，我們將 Messenger::Message 當作 subject_id 的辨識。每個範例推送都有獨特的 subject_id 值在同一 topic 下來辨認屬於哪個實例。
-在使用默認的 QOS 下，具有相同 subject_id 的值會被後續相同的 subject_id 的值替換掉。
+在使用默認的 QOS 下，具有相同 subject_id 的值會被後續相同的 subject_id 的值替換掉。<br>
 註1.其他類型（例如structures, sequences, 和 arrays）不能直接當做 key，但是當這些members/elements是numeric, enumerated, string 類型時，structs or elements of arrays 的單個成員可以用作 key。
 ## 2.1.2處理IDL
 
@@ -126,7 +126,7 @@ int main (int argc, char *argv[]) {
   }
 ```
 
-`TheParticipantFactoryWithArgs` 巨集 `Service_Participant.h` 中定義，並以命令列參數來初始化  Domain Participant Factory。這些命令參數用於初始化 ORB 也就是 OpenDDS 服務本身。這也允許我們略過 ORB_init()選項以及 OpenDDS 的 DCPS* 選項設定。可用的OpenDDS選項在第7章中有詳細描述。
+`TheParticipantFactoryWithArgs` 在 `Service_Participant.h` 中定義，並以命令列參數來初始化  Domain Participant Factory。這些命令參數用於初始化 ORB 也就是 OpenDDS 服務本身。這也允許我們略過 ORB_init()選項以及 OpenDDS 的 DCPS* 選項設定。可用的OpenDDS選項在第7章中有詳細描述。
 
 `create_participant()` 使用domain 參與工廠註冊 ID 42 的 domain。參與者使用默認的 QOS 而且沒有監聽者。使用 OpenSSD 默認狀態遮罩確保所有相關的溝通狀態改變(像是 資料可用性、liveliness lost)中介層可以和應用層溝通(像是 通過監聽者回傳)。
 
