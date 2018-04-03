@@ -259,36 +259,16 @@ OpenDDS 3.0 開始一個新的傳輸設定設計。
 這是簡單的OpenDDS設定檔，提供給你的應用程式去使用的傳輸設定。這個簡單的設定檔可以被兩個在不同網路電腦上的應用溝通時使用。
 
 ```
-[
-common
-]
+[common]
 
-DCPSGlobalTransportConfig
-=
-myconfig
+DCPSGlobalTransportConfig=myconfig
 
-[
-config
-/
-myconfig
-]
+[config/myconfig]
+transports=mytcp
 
-transports
-=
-mytcp
-
-[
-transport
-/
-mytcp
-]
-
-transport_type
-=
-tcp
-local_address
-=
-myhost
+[transport/mytcp]
+transport_type=tcp
+local_address=myhost
 ```
 
 這個設定檔說明\(從下往上\):  
@@ -303,45 +283,17 @@ myhost
 這個範例讓應用程式主要去使用多播\(multicast\)和當不能使用多播時"fallback"到tcp。設定檔如下：
 
 ```
-[
-common
-]
+[common]
+DCPSGlobalTransportConfig=myconfig
 
-DCPSGlobalTransportConfig
-=
-myconfig
+[config/myconfig]
+transports=mymulticast,mytcp
 
-[
-config
-/
-myconfig
-]
+[transport/mymulticast]
+transport_type=multicast
 
-transports
-=
-mymulticast
-,
-mytcp
-
-[
-transport
-/
-mymulticast
-]
-
-transport_type
-=
-multicast
-
-[
-transport
-/
-mytcp
-]
-
-transport_type
-=
-tcp
+[transport/mytcp]
+transport_type=tcp
 ```
 
 這個叫 myconfig 的傳輸設定檔包含兩個傳輸實例 mymulticast 和 mytcp 。也沒有任何參數在指定再 transport\_type 旁邊，所以他們使用預設的傳輸設定實例。使用者可以自由的使用列表上的傳輸設定。  
@@ -354,59 +306,22 @@ tcp
 例如有一個電腦上有兩個網路介面，上面的應用程式通訊以些是經過其中一個介面，剩下的經過另外一個。這是我們的設定檔。
 
 ```
-[
-common
-]
+[common]
+DCPSGlobalTransportConfig=config_a
 
-DCPSGlobalTransportConfig
-=
-config_a
+[config/config_a]
+transports=tcp_a
 
-[
-config
-/
-config_a
-]
+[config/config_b]
+transports=tcp_b
 
-transports
-=
-tcp_a
+[transport/tcp_a]
+transport_type=tcp
+local_address=hosta
 
-[
-config
-/
-config_b
-]
-
-transports
-=
-tcp_b
-
-[
-transport
-/
-tcp_a
-]
-
-transport_type
-=
-tcp
-local_address
-=
-hosta
-
-[
-transport
-/
-tcp_b
-]
-
-transport_type
-=
-tcp
-local_address
-=
-hostb
+[transport/tcp_b]
+transport_type=tcp
+local_address=hostb
 ```
 
 假設hosta和hostb是指派給兩個網路介面的名子，現在可以分離各自的tcp設定。把"A"設定設為預設，"B"設定為手動設定。
